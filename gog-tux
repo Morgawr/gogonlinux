@@ -2,4 +2,5 @@
 
 from gog_gui import gog_gui
 
-gog_gui.PrintHello()
+program = gog_gui.GogTuxGUI()
+program.main()

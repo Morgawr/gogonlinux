@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<glade-interface>
+  <!-- interface-requires gtk+ 2.24 -->
+  <!-- interface-naming-policy project-wide -->
+  <widget class="GtkWindow" id="aboutpopup">
+    <property name="width_request">370</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">About GOG Linux Client</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <child>
+      <widget class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">15</property>
+        <child>
+          <widget class="GtkLabel" id="titlelabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Linux GOG Client
+(unofficial)
+version - </property>
+            <property name="justify">center</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="padding">5</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="descriptionlabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="xpad">5</property>
+            <property name="label" translatable="yes">This is the unofficial Linux gog client, it downloads and installs gog games using compatibility patches/fixes for Linux according to www.gogonlinux.com</property>
+            <property name="justify">center</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="authorlabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="ypad">10</property>
+          </widget>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+</glade-interface>

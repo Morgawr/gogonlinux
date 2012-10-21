@@ -143,11 +143,168 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <widget class="GtkFixed" id="fixed2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <widget class="GtkImage" id="profilepic">
+                        <property name="width_request">200</property>
+                        <property name="height_request">200</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-missing-image</property>
+                      </widget>
+                      <packing>
+                        <property name="x">10</property>
+                        <property name="y">10</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label7">
+                        <property name="width_request">100</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Account name:</property>
+                      </widget>
+                      <packing>
+                        <property name="x">10</property>
+                        <property name="y">220</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="accountlabel">
+                        <property name="width_request">200</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Morgawr</property>
+                        <property name="ellipsize">end</property>
+                      </widget>
+                      <packing>
+                        <property name="x">120</property>
+                        <property name="y">220</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label8">
+                        <property name="width_request">100</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">e-mail:
+</property>
+                      </widget>
+                      <packing>
+                        <property name="x">10</property>
+                        <property name="y">250</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label9">
+                        <property name="width_request">200</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">morgawr@gmail.com</property>
+                      </widget>
+                      <packing>
+                        <property name="x">120</property>
+                        <property name="y">250</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label10">
+                        <property name="width_request">130</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Game notifications:</property>
+                      </widget>
+                      <packing>
+                        <property name="x">10</property>
+                        <property name="y">280</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="gamenotelabel">
+                        <property name="width_request">150</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">none</property>
+                      </widget>
+                      <packing>
+                        <property name="x">150</property>
+                        <property name="y">280</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label11">
+                        <property name="width_request">130</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Forum notifications:</property>
+                      </widget>
+                      <packing>
+                        <property name="x">10</property>
+                        <property name="y">310</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="forumnotelabel">
+                        <property name="width_request">150</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">none</property>
+                      </widget>
+                      <packing>
+                        <property name="x">150</property>
+                        <property name="y">310</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label12">
+                        <property name="width_request">130</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Private messages:</property>
+                      </widget>
+                      <packing>
+                        <property name="x">10</property>
+                        <property name="y">340</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="privatenotelabel">
+                        <property name="width_request">150</property>
+                        <property name="height_request">20</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">none</property>
+                      </widget>
+                      <packing>
+                        <property name="x">150</property>
+                        <property name="y">340</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <widget class="GtkLabel" id="label6">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Profile</property>
+                  </widget>
                   <packing>
+                    <property name="position">2</property>
+                    <property name="tab_fill">False</property>
                     <property name="type">tab</property>
                   </packing>
                 </child>

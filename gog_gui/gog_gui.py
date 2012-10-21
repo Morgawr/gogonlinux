@@ -31,6 +31,7 @@ class GogTuxGUI:
 
         self.window = self.wTree.get_widget("gog_tux")
         self.window.show()
+        self.__show_login()
 
     
     # This simply creates the about popup window and appends relevant data
@@ -43,8 +44,22 @@ class GogTuxGUI:
         authorlabel.set_text(author + " - " + email)
         aboutwin.show()
 
+    def __show_login(self):
+        loginglade = gtk.glade.XML(os.path.join(package_directory,"login.glade"))
+        loginwin = loginglade.get_widget("logindialog")
+        signals = { "on_cancelbutton_activated" : gtk.main_quit,
+                    "on_cancelbutton_clicked" : gtk.main_quit,
+                    "on_logindialog_destroy" : gtk.main_quit,
+                    "on_okbutton_activated" : self.do_login,
+                    "on_okbutton_clicked" : self.do_login }
+        loginglade.signal_autoconnect(signals)
+        loginwin.show()
+
+    def do_login(self, widget):
+        print "do_connect called"
+
     def main(self):
-        print "Hello " + self.connection.connect("morgawr+gogonlinux@gmail.com","gogonlinux")
+        #print "Hello " + self.connection.connect(email,password)
         gtk.main()
 
 

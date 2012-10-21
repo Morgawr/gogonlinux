@@ -14,8 +14,9 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 
 class GogTuxGUI:
     
-    def __init__(self):
-
+    def __init__(self, connection):
+        
+        self.connection = connection
         self.gladefile = os.path.join(package_directory,"gog_tux.glade")
         self.wTree = gtk.glade.XML(self.gladefile)
         self.rightpanel = self.wTree.get_widget("fixed1")
@@ -23,13 +24,16 @@ class GogTuxGUI:
         
         #This is a dictionary of all the signals handled by our GUI
         signals = { "on_gog_tux_destroy" : gtk.main_quit,
+                    "on_close_menu_activated" : gtk.main_quit,
                     "on_about_menu_activated" : self.about_menu_activated }
 
         self.wTree.signal_autoconnect(signals)
 
         self.window = self.wTree.get_widget("gog_tux")
         self.window.show()
-        
+
+    
+    # This simply creates the about popup window and appends relevant data
     def about_menu_activated(self, widget, data=None):
         aboutglade = gtk.glade.XML(os.path.join(package_directory,"about.glade"))
         aboutwin = aboutglade.get_widget("aboutpopup")
@@ -40,4 +44,9 @@ class GogTuxGUI:
         aboutwin.show()
 
     def main(self):
+        print "Hello " + self.connection.connect("morgawr+gogonlinux@gmail.com","gogonlinux")
         gtk.main()
+
+
+
+

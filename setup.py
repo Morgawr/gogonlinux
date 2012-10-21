@@ -7,6 +7,6 @@ setup(name='gog-tux',
       author='Morgawr',
       author_email='morgawr@gmail.com',
       url='www.gogonlinux.com',
-      packages=['gog_gui'],
+      packages=['gog_gui','gog_conn'],
       scripts=['gog-tux']
       )

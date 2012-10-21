@@ -15,7 +15,7 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 class GogTuxGUI:
     
     def __init__(self, connection):
-        
+     
         self.connection = connection
         self.gladefile = os.path.join(package_directory,"gog_tux.glade")
         self.wTree = gtk.glade.XML(self.gladefile)
@@ -36,30 +36,47 @@ class GogTuxGUI:
     
     # This simply creates the about popup window and appends relevant data
     def about_menu_activated(self, widget, data=None):
-        aboutglade = gtk.glade.XML(os.path.join(package_directory,"about.glade"))
-        aboutwin = aboutglade.get_widget("aboutpopup")
-        titlelabel = aboutglade.get_widget("titlelabel")
-        titlelabel.set_text(titlelabel.get_text()+version)
-        authorlabel = aboutglade.get_widget("authorlabel")
-        authorlabel.set_text(author + " - " + email)
-        aboutwin.show()
-
+        about = gtk.AboutDialog()
+        about.set_program_name("Gog Linux Client")
+        about.set_version(version)
+        about.set_copyright(author+" - "+email)
+        about.set_comments("Unofficial Linux client for the gog.com platform")
+        about.set_website("http://www.gogonlinux.com")
+        about.run()
+        about.destroy()
+    
     def __show_login(self):
-        loginglade = gtk.glade.XML(os.path.join(package_directory,"login.glade"))
-        loginwin = loginglade.get_widget("logindialog")
+        self.loginglade = gtk.glade.XML(os.path.join(package_directory,"login.glade"))
+        loginwin = self.loginglade.get_widget("logindialog")
         signals = { "on_cancelbutton_activated" : gtk.main_quit,
                     "on_cancelbutton_clicked" : gtk.main_quit,
-                    "on_logindialog_destroy" : gtk.main_quit,
+                    "on_logindialog_close" : gtk.main_quit,
                     "on_okbutton_activated" : self.do_login,
                     "on_okbutton_clicked" : self.do_login }
-        loginglade.signal_autoconnect(signals)
+        self.loginglade.signal_autoconnect(signals)
         loginwin.show()
 
     def do_login(self, widget):
-        print "do_connect called"
+        email = self.loginglade.get_widget("emailtext").get_text().strip()
+        password = self.loginglade.get_widget("passwordtext").get_text().strip()
+        if not email or not password:
+            self.show_error("Please fill in all the fields")
+            return
+
+        try:
+            self.connection.connect(email, password)
+            self.loginglade.get_widget("logindialog").destroy()
+        except Exception, e:
+           self.show_error("%s" % e)
+           pass
+
+    def show_error(self, error):
+        md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                               gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, error)
+        md.run()
+        md.destroy()
 
     def main(self):
-        #print "Hello " + self.connection.connect(email,password)
         gtk.main()
 
 

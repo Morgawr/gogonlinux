@@ -65,16 +65,12 @@ class GogConnection:
         
         self.__check_status(resp)
         
-        print "OK - Authentication successful"
-        
         final_token = dict(urlparse.parse_qsl(content))['oauth_token']
         final_secret = dict(urlparse.parse_qsl(content))['oauth_token_secret']
 
         self.auth_token = oauth.Token(final_token, final_secret)
         
         client = oauth.Client(self.consumer,self.auth_token)
-        
-        print "Retrieving user data..."
         
         resp, content = client.request("https://api.gog.com/en/downloader2/user/")
         

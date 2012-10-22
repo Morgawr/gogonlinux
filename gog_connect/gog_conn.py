@@ -30,8 +30,6 @@ class GogConnection:
             return True
         raise Exception("Invalid request, response %s." % resp['status'])
 
-
-    
     def connect(self, username, password):
     
         client = oauth.Client(self.consumer)
@@ -72,15 +70,24 @@ class GogConnection:
         
         client = oauth.Client(self.consumer,self.auth_token)
         
-        resp, content = client.request("https://api.gog.com/en/downloader2/user/")
-        
-        self.__check_status(resp)
-        
         print "Success"
-    
-        userdata = json.loads(content)
+
+
+    def get_user_data(self):
         
-        return userdata["user"]["xywka"]
+        if not ('auth_token' in dir(self)):
+            raise Exception("Not logged in correctly.")
+        
+        client = oauth.Client(self.consumer,self.auth_token)
+        resp, content = client.request("https://api.gog.com/en/downloader2/user/")
+        self.__check_status(resp)
+
+        return content
+
+
+            
+
+
 
 
 

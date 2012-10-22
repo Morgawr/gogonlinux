@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gog_gui import gog_gui
+from gog_client import gog_gui
 from gog_connect import gog_conn
 
 connection = gog_conn.GogConnection()

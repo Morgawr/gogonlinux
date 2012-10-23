@@ -85,9 +85,3 @@ class GogConnection:
         return content
 
 
-            
-
-
-
-
-

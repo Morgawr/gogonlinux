@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+from gog_connect import gog_conn
+
+import sys
+import getopt
+import os
+import ConfigParser
+import subprocess
+
+class Usage(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def print_usage():
+    # I know, this is ugly, apologies
+    print "Usage: gog-installer --token=<token> --secret=<secret> [--install-path=<path>] <game_id>"
+    print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
+          "       Typically you will want to run this program through the gog-tux graphical interface\n"
+          "       instead of the command line directly.\n"
+          "       --token is the secret authorization token received\n"
+          "               from gog.com upon a successful login\n"
+          "       --secret is the secret authorization key received\n"
+          "                from gog.com upon a successful login\n"
+          "       --install-path is the OPTIONAL parameter for the install\n"
+          "                      location of the game (default is ~/games/gog/<game_id>)\n"
+          "       -h/--help will show this info text again")
+
+#TODO: this one is copied from gog_gui, I should refactor them into a single module
+def load_settings(conf):
+    parser = ConfigParser.ConfigParser()
+    parser.read(conf)
+    sets = {}
+    section = "settings"
+    for opt in parser.options(section):
+        try:
+            sets[opt] = parser.get(section, opt)
+        except:
+            print "Exception in config parsing on %s " % option
+            sets[opt] = None
+    return sets
+
+#TODO: add option for already existing setup file
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    try:
+        try: 
+            opts, args = getopt.getopt(argv[1:], "h", ["help","token=","secret="])
+        except getopt.error, msg:
+            raise Usage(msg)
+        path = ""
+        token = ""
+        secret = ""
+        for o, a in opts:
+            if o in ("-h", "--help"):
+                print_usage()
+                return 0
+            elif o == "--token":
+                token = a
+            elif o == "--secret":
+                secret = a
+            elif o == "--install-path":
+                path = a
+        config_path = os.path.join(os.getenv("HOME"),".gog-tux","config")
+        settings = load_settings(config_path)
+        game_id = args[0]
+        if token=="" or secret=="":
+            raise Usage("token and secret must be specified")
+        if path == "":
+            path = os.path.join(settings["install_path"],game_id)
+        conn = gog_conn.GogConnection()
+        conn.set_auth_token(token,secret)
+        setup = conn.download_game(game_id,"/tmp/")
+        # For the love of God do not touch this yet
+        command = "mkdir -p "+path+" && cd "+path+" && innoextract "+setup+" && rm -rf tmp && cd app && mv * .. && cd .. && rmdir app && rm "+setup
+        #let's extract the file
+        shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        shell.stdin.write(command+"\n")
+        shell.communicate()
+        shell.stdin.close()
+        # Now we need to update the local database and download the install/uninstall scripts
+        # then we need to run the install script on the target's directory
+
+
+    except Usage, err:
+        print >>sys.stderr, err.msg
+        print >>sys.stderr, "for help use --help"
+        return 2
+
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

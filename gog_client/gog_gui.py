@@ -1,0 +1,322 @@
+
+import sys
+import os
+import pygtk
+pygtk.require("2.0")
+import gtk
+import gobject
+import gtk.glade
+import threading
+import time
+import data_handle
+import urllib2
+import ConfigParser
+import gog_db
+from gogonlinux import gol_connection as site_conn
+
+version = "0.1.0"
+author = "Morgawr"
+email = "morgawr@gmail.com"
+package_directory = os.path.dirname(os.path.abspath(__file__))
+gobject.threads_init()
+
+class GogTuxGUI:
+    
+    #some image data
+    compat = {}
+    compat["green"] = gtk.Image()
+    compat["green"].set_from_file(os.path.join(package_directory,"imgdata","green_compat.png"))
+    compat["green"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","green_compat.png"))
+    compat["yellow"] = gtk.Image()
+    compat["yellow"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","yellow_compat.png"))
+    compat["red"] = gtk.Image()
+    compat["red"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","red_compat.png"))
+
+    #some other default stuff
+    islogged = False
+    game_data = {}
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.gladefile = os.path.join(package_directory,"gog_tux.glade")
+        self.wTree = gtk.glade.XML(self.gladefile)
+        self.rightpanel = self.wTree.get_widget("fixed1")
+        self.rightpanel.hide()
+        #This is a dictionary of all the signals handled by our GUI
+        signals = { "on_gog_tux_destroy" : gtk.main_quit,
+                    "on_close_menu_activated" : gtk.main_quit,
+                    "on_about_menu_activated" : self.about_menu_activated,
+                    "on_undoprefsbutton_activated" : self.undo_settings,
+                    "on_undoprefsbutton_clicked" : self.undo_settings,
+                    "on_saveprefsbutton_activated" : self.save_settings,
+                    "on_saveprefsbutton_clicked" : self.save_settings,
+                    "on_gog_tux_key_pressed" : self.key_pressed }
+        self.wTree.signal_autoconnect(signals)
+        #obtain required resources
+        self.window = self.wTree.get_widget("gog_tux")
+        self.window.show()
+        #set up gui elements
+        self.init_gui_elements()
+        #set up the lists for the games 
+        self.init_lists()
+        #finalize initialization
+        self.loginwindow = LoginWindow(self)
+        self.load_games()
+        self.acquire_settings()
+        self.undo_settings(None)
+
+    # Performs initialization of some gui elements storing them in the class
+    def init_gui_elements(self):
+        self.accountlabel = self.wTree.get_widget("accountlabel")
+        self.emaillabel = self.wTree.get_widget("emaillabel")
+        self.gamenotelabel = self.wTree.get_widget("gamenotelabel")
+        self.forumnotelabel = self.wTree.get_widget("forumnotelabel")
+        self.privatenotelabel = self.wTree.get_widget("privatenotelabel")
+        self.profilepic = self.wTree.get_widget("profilepic")
+        self.installpathentry = self.wTree.get_widget("installpathentry")
+        self.virtualdesktopcheck = self.wTree.get_widget("virtualdesktopcheck")
+        self.profileintervalentry = self.wTree.get_widget("profileintervalentry")
+        self.launchbutton = self.wTree.get_widget("launchbutton")
+        self.installbutton = self.wTree.get_widget("installbutton")
+        self.uninstallbutton = self.wTree.get_widget("uninstallbutton")
+        self.gamenamelabel = self.wTree.get_widget("namelabel")
+        self.gameinstalledlabel = self.wTree.get_widget("installedlabel")
+        self.gameemulationlabel = self.wTree.get_widget("emulationlabel")
+        self.gamecoverimage = self.wTree.get_widget("coverimage")
+        
+    # Performs initialization of the available and installed games lists
+    def init_lists(self):
+        self.availablegamestree = self.wTree.get_widget("availablegamestree")
+        self.installedgamestree = self.wTree.get_widget("installedgamestree")
+        textrenderer = gtk.CellRendererText()
+        imagerenderer = gtk.CellRendererPixbuf()
+        columna = gtk.TreeViewColumn("Games", textrenderer, text=0)
+        columnb = gtk.TreeViewColumn("Emulation mode", textrenderer, text=1)
+        columnc = gtk.TreeViewColumn("Compatibility", imagerenderer)
+        columnc.add_attribute(imagerenderer,"pixbuf", 2)
+        #setup list of available games
+        # 0 is the displayed name
+        # 1 is emulation mode
+        # 2 is visual representation of current compatibility state (green, yellow and red)
+        # 3 is the game id in the lookup dictionary, not going to be displayed, just used for retrieval
+        self.availgameslist = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gtk.gdk.Pixbuf, gobject.TYPE_STRING)
+        #this is how you add a game
+        #self.availgameslist.append(("Beneath a Steel Sky","scummvm",self.compat["green"]))
+        self.availablegamestree.set_model(self.availgameslist)
+        self.availablegamestree.append_column(columna)
+        self.availablegamestree.append_column(columnb)
+        self.availablegamestree.append_column(columnc)
+        selection = self.availablegamestree.get_selection()
+        selection.connect("changed", self.list_selection_changed, self.availablegamestree)
+        selection = self.installedgamestree.get_selection()
+        selection.connect("changed", self.list_selection_changed, self.installedgamestree)
+
+    # This simply creates the about popup window and appends relevant data
+    def about_menu_activated(self, widget, data=None):
+        about = gtk.AboutDialog()
+        about.set_program_name("Gog Linux Client")
+        about.set_version(version)
+        about.set_copyright(author+" - "+email)
+        about.set_comments("Unofficial Linux client for the gog.com platform")
+        about.set_website("http://www.gogonlinux.com")
+        about.run()
+        about.destroy()
+
+    # Signal that reacts to either available games or installed games has been clicked
+    def list_selection_changed(self, widget, data):
+        if data == self.availablegamestree:
+            self.rightpanel.show()
+            items, paths = data.get_selection().get_selected_rows()
+            element = items.get_iter(paths[0])
+            game = self.game_data[items.get_value(element,3)]
+            self.show_game_card(game)
+        elif data == self.installedgamestree:
+            pass
+        else:
+            self.rightpanel.hide()
+
+    # Shows the game card of the selected game. 
+    # If the game is currently installed then it lets the user uninstall it or launch it
+    # If the game is not installed it lets the user download it
+    def show_game_card(self, game):
+        #here we should add a check to see if the game is installed or not
+        #TODO: skipping check
+        self.uninstallbutton.set_sensitive(False)
+        self.installbutton.set_sensitive(True)
+        self.launchbutton.set_sensitive(False)
+        self.gamenamelabel.set_text(game["title"])
+        self.gameinstalledlabel.set_text("Not Installed")
+        self.gameemulationlabel.set_text(game["emulation"])
+        t = threading.Thread(target=self.do_set_cover_image, args=(self.gamecoverimage, game["cover_url"]))
+        t.start()
+
+    def key_pressed(self, widget, data):
+        if data.keyval == gtk.keysyms.Escape:
+            self.rightpanel.hide()
+    
+    def login_callback(self):
+        if self.loginwindow.result == "Success": #we logged in successfully
+            self.loginwindow.loginglade.get_widget("logindialog").destroy()
+            self.islogged = True
+            self.profile_update()
+        else: #we failed the login process
+            self.loginwindow.loginglade.get_widget("okbutton").set_sensitive(True)
+            self.show_error(self.loginwindow.result)
+
+    def profile_update(self):
+        try:
+            self.user = data_handle.UserData(self.connection.get_user_data())
+        except:
+            self.show_error("There was a connection problem with the login page. Live profile update will be disabled.\n"
+                            "Please relog/restart the client.")
+            return False
+        self.accountlabel.set_text(self.user.name)
+        self.emaillabel.set_text(self.user.email)
+        if self.user.forum != "0":
+            self.forumnotelabel.set_text(self.user.forum)
+        else:
+            self.forumnotelabel.set_text("none")
+        if self.user.messages != "0":
+            self.privatenotelabel.set_text(self.user.messages)
+        else:
+            self.privatenotelabel.set_text("none")
+        if self.user.games != "0":
+            self.gamenotelabel.set_text(self.user.games)
+        else:
+            self.gamenotelabel.set_text("none")
+        #Let's load the picture from the web
+        response = urllib2.urlopen(self.user.imagesmall)
+        loader = gtk.gdk.PixbufLoader()
+        loader.write(response.read())
+        loader.close()
+        self.profilepic.set_from_pixbuf(loader.get_pixbuf().scale_simple(35,35,gtk.gdk.INTERP_BILINEAR))
+        #refresh the update based on the settings, we do this because they may change dynamically
+        #so we have to break the chain and re-create it every time
+        gobject.timeout_add_seconds(int(self.settings["profile_update"]),self.profile_update)
+        return False
+
+
+    def show_error(self, error):
+        md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                               gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, error)
+        md.run()
+        md.destroy()
+
+    def main(self):
+        gtk.main()
+
+    def acquire_settings(self):
+        path = os.path.join(os.getenv("HOME"),".gog-tux")
+        if not os.path.exists(path):
+            os.makedirs(path)
+        configfile = os.path.join(path,"config")
+        if not os.path.exists(configfile):
+            self.settings = self.obtain_default_settings()
+            self.store_settings()
+        else:
+            self.settings = self.load_settings(configfile)
+
+    #difference between this and store_settings is that this function 
+    #obtains the settings from the GUI, applies them to the program
+    #and only then calls store_settings to update the settings
+    #on the filesystem
+    def save_settings(self, widget):
+        self.settings["install_path"] = self.installpathentry.get_text()
+        self.settings["use_virtual_desktop"] = str(self.virtualdesktopcheck.get_active())
+        self.settings["profile_update"] = self.profileintervalentry.get_text()
+        self.store_settings()
+
+    #we revert to the unmodified settings
+    def undo_settings(self, widget):
+        self.installpathentry.set_text(self.settings["install_path"])
+        self.virtualdesktopcheck.set_active(self.settings["use_virtual_desktop"] == "True")
+        self.profileintervalentry.set_text(self.settings["profile_update"])
+        pass
+
+    def store_settings(self):
+        path = os.path.join(os.getenv("HOME"),".gog-tux")
+        if not os.path.exists(path):
+            os.makedirs(path)
+        configfile = os.path.join(path,"config")
+        parser = ConfigParser.ConfigParser()
+        section = "settings"
+        parser.add_section(section)
+        parser.set(section,"install_path", self.settings["install_path"])
+        parser.set(section,"use_virtual_desktop", self.settings["use_virtual_desktop"])
+        parser.set(section,"profile_update", self.settings["profile_update"])
+        f = open(configfile,'w+')
+        parser.write(f)
+        f.close()
+
+    def obtain_default_settings(self):
+        sets = {}
+        sets["install_path"] = os.path.join(os.getenv("HOME"),"games","gog")
+        sets["use_virtual_desktop"] = False
+        sets["profile_update"] = 120
+        return sets
+
+    def load_settings(self, conf):
+        parser = ConfigParser.ConfigParser()
+        parser.read(conf)
+        sets = {}
+        section = "settings"
+        for opt in parser.options(section):
+            try:
+                sets[opt] = parser.get(section, opt)
+            except:
+                print "Exception in config parsing on %s " % option
+                sets[opt] = None
+        return sets
+
+    def do_load_games(self):
+        self.game_data = site_conn.obtain_available_games()
+        for name, content in self.game_data.items():
+            self.availgameslist.append((content["title"],content["emulation"],self.compat[content["compat"]],name))
+
+    def do_set_cover_image(self, gui, url):
+        response = urllib2.urlopen(url)
+        loader = gtk.gdk.PixbufLoader()
+        loader.write(response.read())
+        loader.close()
+        gui.set_from_pixbuf(loader.get_pixbuf())
+
+    #loads the list of available games from gogonlinux.com
+    def load_games(self):
+        t = threading.Thread(target=self.do_load_games)
+        t.start()
+
+
+
+class LoginWindow:
+
+    def __init__(self, parent):
+        self.loginglade = gtk.glade.XML(os.path.join(package_directory,"login.glade"))
+        loginwin = self.loginglade.get_widget("logindialog")
+        signals = { "on_cancelbutton_activated" : gtk.main_quit,
+                    "on_cancelbutton_clicked" : gtk.main_quit,
+                    "on_logindialog_close" : gtk.main_quit,
+                    "on_okbutton_activated" : self.do_login,
+                    "on_okbutton_clicked" : self.do_login }
+        self.loginglade.signal_autoconnect(signals)
+        loginwin.show()
+        self.parent = parent
+ 
+    def do_login(self, widget):
+        email = self.loginglade.get_widget("emailtext").get_text().strip()
+        password = self.loginglade.get_widget("passwordtext").get_text().strip()
+        if not email or not password:
+            self.parent.show_error("Please fill in all the fields")
+            return
+        self.loginglade.get_widget("okbutton").set_sensitive(False)
+        t = threading.Thread(target=self.__threaded_do_login, args=(email, password))
+        t.start()
+              
+    def __threaded_do_login(self, email, password):
+        try:
+            self.parent.connection.connect(email, password)
+            self.result = "Success"
+        except Exception, e:
+            self.result = "%s" % e
+        gobject.idle_add(self.parent.login_callback)
+   
+

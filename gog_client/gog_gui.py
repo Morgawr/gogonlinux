@@ -11,13 +11,14 @@ import time
 import data_handle
 import urllib2
 import ConfigParser
-import gog_db
+from gog_db import gog_db
 from gogonlinux import gol_connection as site_conn
 
 version = "0.1.0"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
+dbpath = os.path.join(os.getenv("HOME"), ".gog-tux", "db.json")
 gobject.threads_init()
 
 class GogTuxGUI:
@@ -34,7 +35,9 @@ class GogTuxGUI:
 
     #some other default stuff
     islogged = False
-    game_data = {}
+    game_data = {} # list of all available games from the website
+    database = gog_db.GogDatabase(dbpath)
+
 
     def __init__(self, connection):
         self.connection = connection
@@ -94,18 +97,26 @@ class GogTuxGUI:
         columnb = gtk.TreeViewColumn("Emulation mode", textrenderer, text=1)
         columnc = gtk.TreeViewColumn("Compatibility", imagerenderer)
         columnc.add_attribute(imagerenderer,"pixbuf", 2)
-        #setup list of available games
+        inst_columna = gtk.TreeViewColumn("Games", textrenderer, text=0)
+        inst_columnb = gtk.TreeViewColumn("Emulation mode", textrenderer, text=1)
+        inst_columnc = gtk.TreeViewColumn("Compatibility", imagerenderer)
+        inst_columnc.add_attribute(imagerenderer,"pixbuf", 2)
+        
+        # setup list of available games and installed games
         # 0 is the displayed name
         # 1 is emulation mode
         # 2 is visual representation of current compatibility state (green, yellow and red)
         # 3 is the game id in the lookup dictionary, not going to be displayed, just used for retrieval
         self.availgameslist = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gtk.gdk.Pixbuf, gobject.TYPE_STRING)
-        #this is how you add a game
-        #self.availgameslist.append(("Beneath a Steel Sky","scummvm",self.compat["green"]))
+        self.installedgameslist = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gtk.gdk.Pixbuf, gobject.TYPE_STRING)
         self.availablegamestree.set_model(self.availgameslist)
         self.availablegamestree.append_column(columna)
         self.availablegamestree.append_column(columnb)
         self.availablegamestree.append_column(columnc)
+        self.installedgamestree.set_model(self.installedgameslist)
+        self.installedgamestree.append_column(inst_columna)
+        self.installedgamestree.append_column(inst_columnb)
+        self.installedgamestree.append_column(inst_columnc)
         selection = self.availablegamestree.get_selection()
         selection.connect("changed", self.list_selection_changed, self.availablegamestree)
         selection = self.installedgamestree.get_selection()
@@ -124,28 +135,32 @@ class GogTuxGUI:
 
     # Signal that reacts to either available games or installed games has been clicked
     def list_selection_changed(self, widget, data):
-        if data == self.availablegamestree:
+        if data == self.availablegamestree or data == self.installedgamestree:
             self.rightpanel.show()
             items, paths = data.get_selection().get_selected_rows()
             element = items.get_iter(paths[0])
             game = self.game_data[items.get_value(element,3)]
-            self.show_game_card(game)
-        elif data == self.installedgamestree:
-            pass
+            self.show_game_card(game,items.get_value(element,3))
         else:
             self.rightpanel.hide()
 
     # Shows the game card of the selected game. 
     # If the game is currently installed then it lets the user uninstall it or launch it
     # If the game is not installed it lets the user download it
-    def show_game_card(self, game):
+    def show_game_card(self, game, game_id=None):
         #here we should add a check to see if the game is installed or not
         #TODO: skipping check
-        self.uninstallbutton.set_sensitive(False)
-        self.installbutton.set_sensitive(True)
-        self.launchbutton.set_sensitive(False)
+        if game_id in self.database.games.keys():
+            self.uninstallbutton.set_sensitive(True)
+            self.installbutton.set_sensitive(False)
+            self.launchbutton.set_sensitive(True)
+            self.gameinstalledlabel.set_text(self.database.games[game_id].install_path)
+        else:
+            self.uninstallbutton.set_sensitive(False)
+            self.installbutton.set_sensitive(True)
+            self.launchbutton.set_sensitive(False)
+            self.gameinstalledlabel.set_text("Not Installed")
         self.gamenamelabel.set_text(game["title"])
-        self.gameinstalledlabel.set_text("Not Installed")
         self.gameemulationlabel.set_text(game["emulation"])
         t = threading.Thread(target=self.do_set_cover_image, args=(self.gamecoverimage, game["cover_url"]))
         t.start()
@@ -272,6 +287,10 @@ class GogTuxGUI:
         self.game_data = site_conn.obtain_available_games()
         for name, content in self.game_data.items():
             self.availgameslist.append((content["title"],content["emulation"],self.compat[content["compat"]],name))
+        self.database.update()
+        for game_id, game in self.database.games.items():
+            self.installedgameslist.append((game.full_name, game.emulation, self.compat[game.compat], game_id))
+
 
     def do_set_cover_image(self, gui, url):
         response = urllib2.urlopen(url)

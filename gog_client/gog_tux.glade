@@ -640,9 +640,10 @@ games.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Not Installed</property>
+                    <property name="ellipsize">start</property>
                   </widget>
                   <packing>
-                    <property name="x">90</property>
+                    <property name="x">100</property>
                     <property name="y">60</property>
                   </packing>
                 </child>
@@ -724,6 +725,8 @@ games.</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
+                    <signal name="activate" handler="on_installbutton_activated" swapped="no"/>
+                    <signal name="clicked" handler="on_installbutton_activated" swapped="no"/>
                   </widget>
                   <packing>
                     <property name="x">25</property>

@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
 from gog_connect import gog_conn
+from gogonlinux import gol_connection as site_conn
+from gog_db import gog_db
 
 import sys
 import getopt
 import os
 import ConfigParser
 import subprocess
+import shutil
 
 class Usage(Exception):
     def __init__(self, msg):
@@ -14,7 +17,7 @@ class Usage(Exception):
 
 def print_usage():
     # I know, this is ugly, apologies
-    print "Usage: gog-installer --token=<token> --secret=<secret> [--install-path=<path>] <game_id>"
+    print "Usage: gog-installer --token=<token> --secret=<secret> [--install-path=<path>] [-u|--uninstall] <game_id>"
     print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
           "       Typically you will want to run this program through the gog-tux graphical interface\n"
           "       instead of the command line directly.\n"
@@ -24,7 +27,8 @@ def print_usage():
           "                from gog.com upon a successful login\n"
           "       --install-path is the OPTIONAL parameter for the install\n"
           "                      location of the game (default is ~/games/gog/<game_id>)\n"
-          "       -h/--help will show this info text again")
+          "       -h/--help will show this info text again\n"
+          "       -u/--uninstall is used if you want to uninstall a previously installed game")
 
 #TODO: this one is copied from gog_gui, I should refactor them into a single module
 def load_settings(conf):
@@ -46,7 +50,7 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "h", ["help","token=","secret="])
+            opts, args = getopt.getopt(argv[1:], "h:u", ["help","token=","secret=","uninstall"])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
@@ -62,33 +66,91 @@ def main(argv=None):
                 secret = a
             elif o == "--install-path":
                 path = a
-        config_path = os.path.join(os.getenv("HOME"),".gog-tux","config")
-        settings = load_settings(config_path)
-        game_id = args[0]
+            elif o in ("-u", "--uninstall"):
+                do_uninstall(args)
+                return 
+        general_path = os.path.join(os.getenv("HOME"),".gog-tux")
+        config_path = os.path.join(general_path,"config")
+        database_path = os.path.join(general_path,"db.json")
+        if len(args) == 0:
+            raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
         if token=="" or secret=="":
-            raise Usage("token and secret must be specified")
+            raise Usage("token and secret must be specified in install mode")
+        game_id = args[0]
+        settings = load_settings(config_path)
+        database = gog_db.GogDatabase(database_path)
+        database.update()
+        if database.has_game(game_id):
+            raise Usage("Game is already installed in the database at "+ database.games[game_id].install_path)
         if path == "":
             path = os.path.join(settings["install_path"],game_id)
         conn = gog_conn.GogConnection()
         conn.set_auth_token(token,secret)
+        print "Retrieving installer..."
         setup = conn.download_game(game_id,"/tmp/")
+        print "Extracting data..."
         # For the love of God do not touch this yet
-        command = "mkdir -p "+path+" && cd "+path+" && innoextract "+setup+" && rm -rf tmp && cd app && mv * .. && cd .. && rmdir app && rm "+setup
+        command = ("mkdir -p "+path+" && cd "+path+" && innoextract -q "+setup+" && rm -rf tmp && "
+                   "cd app && mv * .. && cd .. && rmdir app && rm "+setup)
         #let's extract the file
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         shell.stdin.write(command+"\n")
         shell.communicate()
         shell.stdin.close()
+        print "Updating local database..."
         # Now we need to update the local database and download the install/uninstall scripts
+        data = site_conn.obtain_available_games()
+        game_data = data[game_id]
+        game = gog_db.GameRecord(game_data["title"],game_data)
+        database.add_game(game_id,game)
+        # let's download the install/uninstall scripts
+        print "Retrieving game scripts from remote server..."
+        install_script = os.path.join(general_path,"install_"+game_id)
+        uninstall_script = os.path.join(general_path,"uninstall_"+game_id)
+        #site_conn.download_script(install_script,game["install_script"])
+        #site_conn.download_script(uninstall_script,game["uninstall_script"])
+        database.games[game_id].install_script_file = install_script
+        database.games[game_id].uninstall_script_file = uninstall_script
+        database.games[game_id].install_path = path
+        database.games[game_id].online_id = game_id
+        database.store()
         # then we need to run the install script on the target's directory
 
+        print "Done. "+database.games[game_id].full_name+" installed in "+path
 
     except Usage, err:
         print >>sys.stderr, err.msg
         print >>sys.stderr, "for help use --help"
         return 2
-
     return 0
+
+def do_uninstall(args):
+    general_path = os.path.join(os.getenv("HOME"),".gog-tux")
+    config_path = os.path.join(general_path,"config")
+    database_path = os.path.join(general_path,"db.json")
+    if len(args) == 0:
+        raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
+    game_id = args[0]
+    settings = load_settings(config_path)
+    database = gog_db.GogDatabase(database_path)
+    database.update()
+    if not database.has_game(game_id):
+        raise Usage("Game is not installed in the current database")
+    print "Running uninstall script..."
+    path = database.games[game_id].install_path
+    # TODO: we should execute the uninstall script here, just passing over as it's not necessary at the moment
+    # ...
+    print "Removing remaining files..."
+    shutil.rmtree(path)
+    if os.path.isfile(database.games[game_id].install_script_file):
+        os.unlink(database.games[game_id].install_script_file)
+    if os.path.isfile(database.games[game_id].uninstall_script_file):
+        os.unlink(database.games[game_id].uninstall_script_file)
+    print "Updating database..."
+    name = database.games[game_id].full_name
+    database.remove_game(game_id)
+    database.store()
+    print name + " has been successfully removed."
 
 if __name__ == "__main__":
     sys.exit(main())

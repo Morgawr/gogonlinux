@@ -9,10 +9,15 @@ def obtain_available_games():
     resp = requests.get(url=(website_url+available_games))
     return json.loads(resp.text)
 
-def obtain_install_path(game_id):
+def obtain_install_url(game_id):
     data = obtain_available_games()
     return data[game_id]["install_script"]
 
-def obtain_uninstall_path(game_id):
+def obtain_uninstall_url(game_id):
     data = obtain_available_games()
     return data[game_id]["uninstall_script"]
+
+def download_script(target, url):
+    r = requests.get(url)
+    with open(target,"w+") as f:
+        f.write(r.content)

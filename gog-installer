@@ -105,22 +105,29 @@ def main(argv=None):
         database.add_game(game_id,game)
         # let's download the install/uninstall scripts
         print "Retrieving game scripts from remote server..."
-        install_script = os.path.join(general_path,"install_"+game_id)
-        uninstall_script = os.path.join(general_path,"uninstall_"+game_id)
-        #site_conn.download_script(install_script,game["install_script"])
-        #site_conn.download_script(uninstall_script,game["uninstall_script"])
+        if not os.path.exists(os.path.join(general_path,"scripts")):
+            os.makedirs(os.path.join(general_path,"scripts"))
+        install_script = os.path.join(general_path,"scripts","install_"+game_id)
+        uninstall_script = os.path.join(general_path,"scripts","uninstall_"+game_id)
         database.games[game_id].install_script_file = install_script
         database.games[game_id].uninstall_script_file = uninstall_script
         database.games[game_id].install_path = path
         database.games[game_id].online_id = game_id
+        if database.games[game_id].install_script != "404":
+            site_conn.download_script(install_script,database.games[game_id].install_script)
+        if database.games[game_id].uninstall_script != "404":
+            site_conn.download_script(uninstall_script,database.games[game_id].uninstall_script)
         database.store()
         # then we need to run the install script on the target's directory
+        if os.path.exists(database.games[game_id].install_script_file):
+            print "Executing install script..."
+            subprocess.call([database.games[game_id].install_script_file + " " + database.games[game_id].install_path], shell=True)
 
         print "Done. "+database.games[game_id].full_name+" installed in "+path
 
     except Usage, err:
         print >>sys.stderr, err.msg
-        print >>sys.stderr, "for help use --help"
+        print >>sys.stderr, "    for help use --help"
         return 2
     return 0
 

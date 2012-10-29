@@ -1,5 +1,7 @@
 import json
 import requests
+import os
+import stat
 
 website_url = "http://www.gogonlinux.com"
 available_games = "/games/available"
@@ -21,3 +23,4 @@ def download_script(target, url):
     r = requests.get(url)
     with open(target,"w+") as f:
         f.write(r.content)
+    os.chmod(target, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)

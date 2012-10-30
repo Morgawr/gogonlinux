@@ -425,14 +425,13 @@ class ExternalOutputWindow:
         token = self.parent.connection.auth_token.key
         secret = self.parent.connection.auth_token.secret
         # this needs to be fixed TODO
-        #cmd = package_directory+"/../gog-installer --secret="+secret+" --token="+token+" "+game_id+"\nexit\n"
         cmd = "gog-installer --secret="+secret+" --token="+token+" "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
 
     def launch_uninstall(self, game_id):
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        cmd = package_directory+"/../gog-installer -u "+game_id+"\nexit\n"
+        cmd = "gog-installer -u "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
 

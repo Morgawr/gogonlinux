@@ -1,0 +1,48 @@
+-------------------------------------------------------------------------------
+
+Gog On Linux
+
+-------------------------------------------------------------------------------
+
+	This project is a collection of two scripts (and some python libraries)
+and its goal is to provide an easy to use platform to play gog 
+(http://www.gog.com) games on a GNU/Linux system. 
+
+Each supported game will be installed using a series of patches provided by
+http://www.gogonlinux.com team and will be tested and stable to run on most
+Linux distributions.
+
+gog-tux is the GUI client that will be installed, it can be used to log onto
+a gog.com account and download/install/launch/uninstall the desired gog games.
+
+gog-installer is a cli implementation that can be used to install, setup and
+uninstall gog.com games.
+
+-------------------------------------------------------------------------------
+
+INSTALLATION:
+
+	To install the desired version of the gogonlinux project, untar the 
+source package (.tar.gz) and execute "python setup.py install" as root. This 
+will setup the required python libraries and install gog-tux and gog-installer
+on your machine.
+
+-------------------------------------------------------------------------------
+
+REQUIRED EXTERNAL SOFTWARE:
+
+- wine (http://www.winehq.org/) is required to run windows (.exe) gog.com games
+- scummvm (http://www.scummvm.org/) is required for some old adventure games
+- dosbox (http://www.dosbox.com/) is required for most old dos videogames
+- innoextract (http://constexpr.org/innoextract/) is required to extract and
+	setup the .exe installers downloaded from gog.com
+
+For an ease of use, please download the aforementioned programs from your 
+distribution's package manager (i.e. apt-get for ubuntu). 
+
+-------------------------------------------------------------------------------
+
+SUBMITTING BUGS:
+
+If you have any bug to submit or question to ask, feel free to send an e-mail
+to the author of this project: morgawr@gmail.com

@@ -12,8 +12,8 @@ import data_handle
 import urllib2
 import ConfigParser
 import subprocess
-from gog_db import gog_db
-from gogonlinux import gol_connection as site_conn
+import gog_db
+import gol_connection as site_conn
 
 version = "0.1.0"
 author = "Morgawr"

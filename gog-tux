@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from gog_client import gog_gui
-from gog_connect import gog_conn
+from gog_utils import gog_gui
+from gog_utils import gog_conn
 
 connection = gog_conn.GogConnection()
 program = gog_gui.GogTuxGUI(connection)

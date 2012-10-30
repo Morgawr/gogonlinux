@@ -11,6 +11,7 @@ import time
 import data_handle
 import urllib2
 import ConfigParser
+import subprocess
 from gog_db import gog_db
 from gogonlinux import gol_connection as site_conn
 
@@ -37,6 +38,7 @@ class GogTuxGUI:
     islogged = False
     game_data = {} # list of all available games from the website
     database = gog_db.GogDatabase(dbpath)
+    selected_game = None
 
 
     def __init__(self, connection):
@@ -53,7 +55,10 @@ class GogTuxGUI:
                     "on_undoprefsbutton_clicked" : self.undo_settings,
                     "on_saveprefsbutton_activated" : self.save_settings,
                     "on_saveprefsbutton_clicked" : self.save_settings,
-                    "on_gog_tux_key_pressed" : self.key_pressed }
+                    "on_gog_tux_key_pressed" : self.key_pressed,
+                    "on_installbutton_activated" : self.installbutton_activated,
+                    "on_launchbutton_activated" : self.launchbutton_activated,
+                    "on_uninstallbutton_activated" : self.uninstallbutton_activated }
         self.wTree.signal_autoconnect(signals)
         #obtain required resources
         self.window = self.wTree.get_widget("gog_tux")
@@ -144,12 +149,28 @@ class GogTuxGUI:
         else:
             self.rightpanel.hide()
 
+    # We know the selected game is from the available games list
+    # because it's not installed yet, else this button would be
+    # disabled
+    def installbutton_activated(self, widget, data=None):
+        pass
+
+    # We know the selected game is from the installed games list
+    # else you wouldn't be able to launch it.
+    def launchbutton_activated(self, widget, data=None):
+        game = self.database.games[self.selected_game]
+        # Here we launch startgame.sh which is the default startup element for all games
+        startup = os.path.join(game.install_path,"startgame.sh")
+        subprocess.Popen([startup])
+
+    # Same assumption as with the launch button. :)
+    def uninstallbutton_activated(self, widget, data=None):
+        pass
+
     # Shows the game card of the selected game. 
     # If the game is currently installed then it lets the user uninstall it or launch it
     # If the game is not installed it lets the user download it
     def show_game_card(self, game, game_id=None):
-        #here we should add a check to see if the game is installed or not
-        #TODO: skipping check
         if game_id in self.database.games.keys():
             self.uninstallbutton.set_sensitive(True)
             self.installbutton.set_sensitive(False)
@@ -160,6 +181,7 @@ class GogTuxGUI:
             self.installbutton.set_sensitive(True)
             self.launchbutton.set_sensitive(False)
             self.gameinstalledlabel.set_text("Not Installed")
+        self.selected_game = game_id
         self.gamenamelabel.set_text(game["title"])
         self.gameemulationlabel.set_text(game["emulation"])
         t = threading.Thread(target=self.do_set_cover_image, args=(self.gamecoverimage, game["cover_url"]))

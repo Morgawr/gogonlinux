@@ -37,7 +37,6 @@ class GogTuxGUI:
     #some other default stuff
     islogged = False
     game_data = {} # list of all available games from the website
-    database = gog_db.GogDatabase(dbpath)
     selected_game = None
 
 
@@ -47,6 +46,9 @@ class GogTuxGUI:
         self.wTree = gtk.glade.XML(self.gladefile)
         self.rightpanel = self.wTree.get_widget("fixed1")
         self.rightpanel.hide()
+        if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
+            os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
+        self.database = gog_db.GogDatabase(dbpath)
         #This is a dictionary of all the signals handled by our GUI
         signals = { "on_gog_tux_destroy" : gtk.main_quit,
                     "on_close_menu_activated" : gtk.main_quit,
@@ -267,7 +269,7 @@ class GogTuxGUI:
     def undo_settings(self, widget):
         self.installpathentry.set_text(self.settings["install_path"])
         self.virtualdesktopcheck.set_active(self.settings["use_virtual_desktop"] == "True")
-        self.profileintervalentry.set_text(self.settings["profile_update"])
+        self.profileintervalentry.set_text(str(self.settings["profile_update"]))
         pass
 
     def store_settings(self):
@@ -316,6 +318,8 @@ class GogTuxGUI:
         self.installedgameslist.clear()
         for game_id, game in self.database.games.items():
             self.installedgameslist.append((game.full_name, game.emulation, self.compat[game.compat], game_id))
+        self.installedgamestree.get_selection().unselect_all()
+        self.availablegamestree.get_selection().unselect_all()
         self.rightpanel.hide()
 
     def do_set_cover_image(self, gui, url):

@@ -46,6 +46,8 @@ def load_settings(conf):
 
 #TODO: add option for already existing setup file
 def main(argv=None):
+    if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
+        os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
     if argv is None:
         argv = sys.argv
     try:

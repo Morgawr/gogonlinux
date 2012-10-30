@@ -8,5 +8,5 @@ setup(name='gog-tux',
       author_email='morgawr@gmail.com',
       url='www.gogonlinux.com',
       packages=['gog_utils'],
-      scripts=['gog-tux']
+      scripts=['gog-tux','gog-installer']
       )

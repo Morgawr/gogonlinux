@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 
-setup(name='gog-tux',
+setup(name='gogonlinux',
       version='0.1.0',
       description='Client for GOG games on Linux',
       author='Morgawr',

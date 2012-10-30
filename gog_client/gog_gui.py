@@ -153,7 +153,7 @@ class GogTuxGUI:
     # because it's not installed yet, else this button would be
     # disabled
     def installbutton_activated(self, widget, data=None):
-        pass
+        installwindow = ExternalOutputWindow(self,self.selected_game) 
 
     # We know the selected game is from the installed games list
     # else you wouldn't be able to launch it.
@@ -165,7 +165,7 @@ class GogTuxGUI:
 
     # Same assumption as with the launch button. :)
     def uninstallbutton_activated(self, widget, data=None):
-        pass
+        uninstallwindow = ExternalOutputWindow(self, self.selected_game, False)
 
     # Shows the game card of the selected game. 
     # If the game is currently installed then it lets the user uninstall it or launch it
@@ -309,10 +309,14 @@ class GogTuxGUI:
         self.game_data = site_conn.obtain_available_games()
         for name, content in self.game_data.items():
             self.availgameslist.append((content["title"],content["emulation"],self.compat[content["compat"]],name))
+        self.refresh_local_list()
+    
+    def refresh_local_list(self):
         self.database.update()
+        self.installedgameslist.clear()
         for game_id, game in self.database.games.items():
             self.installedgameslist.append((game.full_name, game.emulation, self.compat[game.compat], game_id))
-
+        self.rightpanel.hide()
 
     def do_set_cover_image(self, gui, url):
         response = urllib2.urlopen(url)
@@ -327,11 +331,10 @@ class GogTuxGUI:
         t.start()
 
 
-
 class LoginWindow:
 
     def __init__(self, parent):
-        self.loginglade = gtk.glade.XML(os.path.join(package_directory,"login.glade"))
+        self.loginglade = gtk.glade.XML(os.path.join(package_directory, "login.glade"))
         loginwin = self.loginglade.get_widget("logindialog")
         signals = { "on_cancelbutton_activated" : gtk.main_quit,
                     "on_cancelbutton_clicked" : gtk.main_quit,
@@ -360,4 +363,93 @@ class LoginWindow:
             self.result = "%s" % e
         gobject.idle_add(self.parent.login_callback)
    
+
+class ExternalOutputWindow:
+
+    working = True
+    process = None
+    
+    def __init__(self, parent, game_id, install=True, path=None):
+        self.glade = gtk.glade.XML(os.path.join(package_directory, "externalwindow.glade"))
+        self.window = self.glade.get_widget("externalwindow")
+        self.textview = self.glade.get_widget("outputview")
+        self.textview.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse('black'))
+        self.textview.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('green'))
+        self.spinner = self.glade.get_widget("spinner1")
+        self.buf = gtk.TextBuffer()
+        self.textview.set_buffer(self.buf)
+        signals = { "on_action_activated" : self.do_action }
+        self.button = self.glade.get_widget("okbutton")
+        self.button.set_label("Cancel")
+        self.glade.signal_autoconnect(signals)
+        self.window.show()
+        self.parent = parent
+        self.install_mode = install
+        self.game_id = game_id
+        if install:
+            self.window.set_title("Installing "+game_id)
+            self.launch_install(game_id, path)
+        else:
+            self.window.set_title("Uninstalling "+game_id)
+            self.button.set_label("Ok")
+            self.button.set_sensitive(False)
+            self.launch_uninstall(game_id)
+
+    def read_output(self, source, condition):
+        if condition == gobject.IO_IN:
+            try:
+                char = source.read(1)
+                self.buf.insert_at_cursor(char)
+                self.textview.scroll_to_mark(self.buf.get_insert(), 0)
+                return True
+            except:
+                return False
+        else:
+            return False
+
+    def __threaded_execute(self, command, pipe):
+        self.working = True
+        gobject.io_add_watch(pipe.stdout, gobject.IO_IN, self.read_output)
+        pipe.stdin.write(command)
+        pipe.stdin.flush()
+        pipe.wait()
+        pipe.stdin.close()
+        self.working = False
+        self.button.set_label("Ok")
+        self.button.set_sensitive(True)
+        self.spinner.stop()
+
+    def launch_install(self, game_id, path):
+        # Let's assume path is None since we haven't implemented this yet
+        self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        token = self.parent.connection.auth_token.key
+        secret = self.parent.connection.auth_token.secret
+        # this needs to be fixed TODO
+        cmd = package_directory+"/../gog-installer --secret="+secret+" --token="+token+" "+game_id+"\nexit\n"
+        thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
+        thread.start()
+
+    def launch_uninstall(self, game_id):
+        self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        cmd = package_directory+"/../gog-installer -u "+game_id+"\nexit\n"
+        thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
+        thread.start()
+
+    def cleanup(self):
+        self.parent.refresh_local_list()
+        self.window.destroy()
+
+    # this is called when we need to stop an install, we call the appropriate uninstall
+    def stop_install(self):
+        ExternalOutputWindow(self.parent, self.game_id, False)
+
+    def do_action(self, widget, data=None):
+        if self.working: # If we need to cancel the action
+            if not self.install_mode: # we cannot cancel an uninstall, sadly
+                return
+            self.process.kill()
+            self.cleanup()
+            self.stop_install()
+        else: # if we are done
+            self.cleanup()
 

@@ -18,6 +18,7 @@ class GogDatabase:
         f = open(self.dbpath)
         data = json.load(f)
         f.close()
+        self.games = {}
         for name, content in data.items():
             self.games[name] = GameRecord(name,content)
 

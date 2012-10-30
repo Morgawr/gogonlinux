@@ -9,8 +9,8 @@
     <property name="resizable">False</property>
     <property name="default_width">800</property>
     <property name="default_height">600</property>
-    <signal name="destroy" handler="on_gog_tux_destroy" swapped="no"/>
-    <signal name="key_press_event" handler="on_gog_tux_key_pressed" swapped="no"/>
+    <signal name="destroy" handler="on_gog_tux_destroy"  />
+    <signal name="key_press_event" handler="on_gog_tux_key_pressed"  />
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -38,7 +38,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_close_menu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_close_menu_activated"  />
                       </widget>
                     </child>
                   </widget>
@@ -64,7 +64,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_about_menu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_about_menu_activated"  />
                       </widget>
                     </child>
                   </widget>
@@ -322,8 +322,8 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <signal name="activate" handler="on_saveprefsbutton_activated" swapped="no"/>
-                        <signal name="clicked" handler="on_saveprefsbutton_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_saveprefsbutton_activated"  />
+                        <signal name="clicked" handler="on_saveprefsbutton_clicked"  />
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -339,8 +339,8 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <signal name="activate" handler="on_undoprefsbutton_activated" swapped="no"/>
-                        <signal name="clicked" handler="on_undoprefsbutton_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_undoprefsbutton_activated"  />
+                        <signal name="clicked" handler="on_undoprefsbutton_clicked"  />
                       </widget>
                       <packing>
                         <property name="top_attach">9</property>
@@ -656,8 +656,8 @@ games.</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_launchbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_launchbutton_activated" swapped="no"/>
+                    <signal name="activate" handler="on_launchbutton_activated"  />
+                    <signal name="clicked" handler="on_launchbutton_activated"  />
                   </widget>
                   <packing>
                     <property name="x">150</property>
@@ -673,8 +673,8 @@ games.</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_uninstallbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_uninstallbutton_activated" swapped="no"/>
+                    <signal name="activate" handler="on_uninstallbutton_activated"  />
+                    <signal name="clicked" handler="on_uninstallbutton_activated"  />
                   </widget>
                   <packing>
                     <property name="x">275</property>
@@ -729,8 +729,8 @@ games.</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_installbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_installbutton_activated" swapped="no"/>
+                    <signal name="activate" handler="on_installbutton_activated"  />
+                    <signal name="clicked" handler="on_installbutton_activated"  />
                   </widget>
                   <packing>
                     <property name="x">25</property>

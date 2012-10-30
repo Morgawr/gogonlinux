@@ -50,7 +50,7 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "h:u", ["help","token=","secret=","uninstall"])
+            opts, args = getopt.getopt(argv[1:], "hu", ["help","token=","secret=","uninstall"])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
@@ -87,7 +87,10 @@ def main(argv=None):
         conn = gog_conn.GogConnection()
         conn.set_auth_token(token,secret)
         print "Retrieving installer..."
-        setup = conn.download_game(game_id,"/tmp/")
+        try:
+            setup = conn.download_game(game_id,"/tmp/")
+        except:
+            return 2
         print "Extracting data..."
         # For the love of God do not touch this yet
         command = ("mkdir -p "+path+" && cd "+path+" && innoextract -q "+setup+" && rm -rf tmp && "

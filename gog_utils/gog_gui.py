@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.0"
+version = "0.1.1"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +64,6 @@ class GogTuxGUI:
         self.wTree.signal_autoconnect(signals)
         #obtain required resources
         self.window = self.wTree.get_widget("gog_tux")
-        self.window.show()
         #set up gui elements
         self.init_gui_elements()
         #set up the lists for the games 
@@ -195,6 +194,7 @@ class GogTuxGUI:
     
     def login_callback(self):
         if self.loginwindow.result == "Success": #we logged in successfully
+            self.window.show()
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
             self.islogged = True
             self.profile_update()
@@ -340,14 +340,17 @@ class LoginWindow:
     def __init__(self, parent):
         self.loginglade = gtk.glade.XML(os.path.join(package_directory, "login.glade"))
         loginwin = self.loginglade.get_widget("logindialog")
-        signals = { "on_cancelbutton_activated" : gtk.main_quit,
-                    "on_cancelbutton_clicked" : gtk.main_quit,
-                    "on_logindialog_close" : gtk.main_quit,
+        signals = { "on_cancelbutton_activated" : self.close,
+                    "on_cancelbutton_clicked" : self.close,
+                    "on_logindialog_close" : self.close,
                     "on_okbutton_activated" : self.do_login,
                     "on_okbutton_clicked" : self.do_login }
         self.loginglade.signal_autoconnect(signals)
         loginwin.show()
         self.parent = parent
+    def close(self, widget, data=None):
+        gtk.main_quit()
+        self.parent.window.destroy()
  
     def do_login(self, widget):
         email = self.loginglade.get_widget("emailtext").get_text().strip()

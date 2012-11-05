@@ -5,14 +5,13 @@
   <widget class="GtkDialog" id="logindialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
-    <property name="type">popup</property>
     <property name="title" translatable="yes">Login</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="type_hint">dialog</property>
-    <signal name="close" handler="on_logindialog_close"  />
-    <signal name="destroy" handler="on_logindialog_destroy"  />
+    <signal name="close" handler="on_logindialog_close" swapped="no"/>
+    <signal name="destroy" handler="on_logindialog_destroy" swapped="no"/>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
@@ -30,8 +29,8 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="activate" handler="on_cancelbutton_activated"  />
-                <signal name="clicked" handler="on_cancelbutton_clicked"  />
+                <signal name="activate" handler="on_cancelbutton_activated" swapped="no"/>
+                <signal name="clicked" handler="on_cancelbutton_clicked" swapped="no"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -46,8 +45,8 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="activate" handler="on_okbutton_activated"  />
-                <signal name="clicked" handler="on_okbutton_clicked"  />
+                <signal name="activate" handler="on_okbutton_activated" swapped="no"/>
+                <signal name="clicked" handler="on_okbutton_clicked" swapped="no"/>
               </widget>
               <packing>
                 <property name="expand">False</property>

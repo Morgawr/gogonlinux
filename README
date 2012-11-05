@@ -35,7 +35,7 @@ To run this software the following python libraries are required:
 
 - python-glade2 
 - python-oauth2 (notice the 2, it's important)
-- python-requests
+- python-requests (it's recommended to install this from python pip)
 
 (names are based on debian/ubuntu repository naming and may vary depending
 on your own distro's package manager)

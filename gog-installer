@@ -93,7 +93,11 @@ def main(argv=None):
             is_user = False
         conn = gog_conn.GogConnection()
         if is_user:
-            conn.connect(email,password)
+            try:
+                conn.connect(email,password)
+            except:
+                raise Usage("Login failed. Be sure you are connected to the internet and that your email and password"
+                            " are correct and working")
         else:
             conn.set_auth_token(token,secret)
         print "Retrieving installer..."
@@ -136,7 +140,8 @@ def main(argv=None):
             print "Executing install script..."
             subprocess.call([database.games[game_id].install_script_file + " " + database.games[game_id].install_path], shell=True)
 
-        print "Done. "+database.games[game_id].full_name+" installed in "+path
+        print "Done."
+        print database.games[game_id].full_name+" installed in "+path
 
     except Usage, err:
         print >>sys.stderr, err.msg

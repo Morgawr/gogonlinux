@@ -23,14 +23,13 @@
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <widget class="GtkButton" id="cancelbutton">
-                <property name="label" translatable="yes">cancel</property>
+              <widget class="GtkCheckButton" id="remembercheckbox">
+                <property name="label" translatable="yes">Remember Me</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
+                <property name="receives_default">False</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="activate" handler="on_cancelbutton_activated" swapped="no"/>
-                <signal name="clicked" handler="on_cancelbutton_clicked" swapped="no"/>
+                <property name="draw_indicator">True</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -52,6 +51,22 @@
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="cancelbutton">
+                <property name="label" translatable="yes">cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_cancelbutton_activated" swapped="no"/>
+                <signal name="clicked" handler="on_cancelbutton_clicked" swapped="no"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </widget>

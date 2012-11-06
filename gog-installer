@@ -54,7 +54,7 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run"])
+            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run","install-path="])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
@@ -167,8 +167,9 @@ def do_uninstall(args):
         raise Usage("Game is not installed in the current database")
     print "Running uninstall script..."
     path = database.games[game_id].install_path
-    # TODO: we should execute the uninstall script here, just passing over as it's not necessary at the moment
-    # ...
+    if database.games[game_id].uninstall_script != "404" and os.path.exists(database.games[game_id].uninstall_script_file):
+        uninstall_script = os.path.join(general_path,"scripts","uninstall_"+game_id)
+        subprocess.call([database.games[game_id].uninstall_script_file + " " + database.games[game_id].install_path], shell=True)
     print "Removing remaining files..."
     shutil.rmtree(path)
     if os.path.isfile(database.games[game_id].install_script_file):

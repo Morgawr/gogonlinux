@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.2"
+version = "0.1.3"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -69,9 +69,14 @@ class GogTuxGUI:
         #set up the lists for the games 
         self.init_lists()
         #finalize initialization
-        self.loginwindow = LoginWindow(self)
         self.load_games()
         self.acquire_settings()
+        if self.check_cookies():
+            token, key = self.obtain_cookies()
+            self.connection.set_auth_token(token, key)
+            self.logged_successfully()
+        else:
+            self.loginwindow = LoginWindow(self)
         self.undo_settings(None)
 
     # Performs initialization of some gui elements storing them in the class
@@ -194,13 +199,16 @@ class GogTuxGUI:
     
     def login_callback(self):
         if self.loginwindow.result == "Success": #we logged in successfully
-            self.window.show()
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
-            self.islogged = True
-            self.profile_update()
+            self.logged_successfully()
         else: #we failed the login process
             self.loginwindow.loginglade.get_widget("okbutton").set_sensitive(True)
             self.show_error(self.loginwindow.result)
+
+    def logged_successfully(self):
+        self.window.show()
+        self.islogged = True
+        self.profile_update()
 
     def profile_update(self):
         try:
@@ -270,7 +278,6 @@ class GogTuxGUI:
         self.installpathentry.set_text(self.settings["install_path"])
         self.virtualdesktopcheck.set_active(self.settings["use_virtual_desktop"] == "True")
         self.profileintervalentry.set_text(str(self.settings["profile_update"]))
-        pass
 
     def store_settings(self):
         path = os.path.join(os.getenv("HOME"),".gog-tux")
@@ -286,6 +293,15 @@ class GogTuxGUI:
         f = open(configfile,'w+')
         parser.write(f)
         f.close()
+
+    def check_cookies(self):
+        if "token" in self.settings and "key" in self.settings:
+            return True
+        else:
+            return False
+
+    def obtain_cookies(self):
+        return (self.settings["token"], self.settings["key"])
 
     def obtain_default_settings(self):
         sets = {}

@@ -60,7 +60,8 @@ class GogTuxGUI:
                     "on_gog_tux_key_pressed" : self.key_pressed,
                     "on_installbutton_activated" : self.installbutton_activated,
                     "on_launchbutton_activated" : self.launchbutton_activated,
-                    "on_uninstallbutton_activated" : self.uninstallbutton_activated }
+                    "on_uninstallbutton_activated" : self.uninstallbutton_activated,
+                    "on_logoutmenu_activated" : self.do_logout }
         self.wTree.signal_autoconnect(signals)
         #obtain required resources
         self.window = self.wTree.get_widget("gog_tux")
@@ -196,11 +197,16 @@ class GogTuxGUI:
     def key_pressed(self, widget, data):
         if data.keyval == gtk.keysyms.Escape:
             self.rightpanel.hide()
+
+    def do_logout(self, widget):
+        del(self.settings["token"])
+        del(self.settings["key"])
+        self.store_settings()
+        gtk.main_quit()
     
     def login_callback(self):
         if self.loginwindow.result == "Success": #we logged in successfully
             if self.loginwindow.remember:
-                print dir(self.connection.auth_token)
                 self.settings["token"] = self.connection.auth_token.key
                 self.settings["key"] = self.connection.auth_token.secret
                 self.store_settings()

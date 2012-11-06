@@ -31,6 +31,16 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
+                      <widget class="GtkMenuItem" id="logoutmenu">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">Log out</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_logoutmenu_activated" swapped="no"/>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkImageMenuItem" id="closemenu">
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>

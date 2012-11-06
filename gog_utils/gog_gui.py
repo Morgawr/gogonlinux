@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.4"
+version = "0.1.5"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -372,7 +372,9 @@ class LoginWindow:
         loginwin = self.loginglade.get_widget("logindialog")
         signals = { "on_cancelbutton_clicked" : self.close,
                     "on_logindialog_close" : self.close,
-                    "on_okbutton_clicked" : self.do_login }
+                    "on_okbutton_clicked" : self.do_login,
+                    "on_passwordtext_activated" : self.do_login,
+                    "on_emailtext_activated" : self.do_login }
         loginwin.connect("delete-event", self.close)
         self.loginglade.signal_autoconnect(signals)
         loginwin.show()

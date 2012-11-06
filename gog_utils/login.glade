@@ -94,6 +94,7 @@ email:</property>
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="activate" handler="on_emailtext_activated" swapped="no"/>
               </widget>
               <packing>
                 <property name="expand">True</property>
@@ -135,6 +136,7 @@ email:</property>
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="activate" handler="on_passwordtext_activated" swapped="no"/>
               </widget>
               <packing>
                 <property name="expand">True</property>

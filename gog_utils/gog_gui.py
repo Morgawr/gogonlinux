@@ -54,9 +54,9 @@ class GogTuxGUI:
                     "on_close_menu_activated" : gtk.main_quit,
                     "on_about_menu_activated" : self.about_menu_activated,
                     "on_undoprefsbutton_activated" : self.undo_settings,
-                    "on_undoprefsbutton_clicked" : self.undo_settings,
+#                    "on_undoprefsbutton_clicked" : self.undo_settings,
                     "on_saveprefsbutton_activated" : self.save_settings,
-                    "on_saveprefsbutton_clicked" : self.save_settings,
+#                    "on_saveprefsbutton_clicked" : self.save_settings,
                     "on_gog_tux_key_pressed" : self.key_pressed,
                     "on_installbutton_activated" : self.installbutton_activated,
                     "on_launchbutton_activated" : self.launchbutton_activated,
@@ -371,10 +371,8 @@ class LoginWindow:
         self.loginglade = gtk.glade.XML(os.path.join(package_directory, "login.glade"))
         loginwin = self.loginglade.get_widget("logindialog")
         signals = { "on_cancelbutton_activated" : self.close,
-                    "on_cancelbutton_clicked" : self.close,
                     "on_logindialog_close" : self.close,
-                    "on_okbutton_activated" : self.do_login,
-                    "on_okbutton_clicked" : self.do_login }
+                    "on_okbutton_activated" : self.do_login }
         loginwin.connect("delete-event", self.close)
         self.loginglade.signal_autoconnect(signals)
         loginwin.show()

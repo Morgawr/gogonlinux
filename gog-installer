@@ -18,7 +18,7 @@ class Usage(Exception):
 
 def print_usage():
     # I know, this is ugly, apologies
-    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [-u|--uninstall] <game_id>"
+    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [-u|--uninstall] [-r|--run] <game_id>"
     print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
           "       Typically you will want to run this program through the gog-tux graphical interface\n"
           "       instead of the command line directly.\n"
@@ -29,7 +29,8 @@ def print_usage():
           "       --install-path is the OPTIONAL parameter for the install\n"
           "                      location of the game (default is ~/games/gog/<game_id>)\n"
           "       -h/--help will show this info text again\n"
-          "       -u/--uninstall is used if you want to uninstall a previously installed game")
+          "       -u/--uninstall is used if you want to uninstall a previously installed game\n"
+          "       -r/--run is used to launch the game from the command line without having to move into the target's directory")
 
 #TODO: this one is copied from gog_gui, I should refactor them into a single module
 def load_settings(conf):
@@ -53,7 +54,7 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hu", ["help","token=","secret=","uninstall"])
+            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run"])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
@@ -72,6 +73,9 @@ def main(argv=None):
             elif o in ("-u", "--uninstall"):
                 do_uninstall(args)
                 return 
+            elif o in ("-r", "--run"):
+                do_launch(args)
+                return
         general_path = os.path.join(os.getenv("HOME"),".gog-tux")
         config_path = os.path.join(general_path,"config")
         database_path = os.path.join(general_path,"db.json")
@@ -176,6 +180,23 @@ def do_uninstall(args):
     database.remove_game(game_id)
     database.store()
     print name + " has been successfully removed."
+
+#TODO: eventually merge do_launch and do_uninstall under the same wrapper
+def do_launch(args):
+    general_path = os.path.join(os.getenv("HOME"),".gog-tux")
+    config_path = os.path.join(general_path,"config")
+    database_path = os.path.join(general_path,"db.json")
+    if len(args) == 0:
+        raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
+    game_id = args[0]
+    settings = load_settings(config_path)
+    database =  gog_db.GogDatabase(database_path)
+    database.update()
+    if not database.has_game(game_id):
+        raise Usage("Game is not installed in the current database")
+    game = database.games[game_id]
+    startup = os.path.join(game.install_path,"startgame.sh")
+    subprocess.Popen([startup])       
 
 if __name__ == "__main__":
     sys.exit(main())

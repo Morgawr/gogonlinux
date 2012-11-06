@@ -199,6 +199,11 @@ class GogTuxGUI:
     
     def login_callback(self):
         if self.loginwindow.result == "Success": #we logged in successfully
+            if self.loginwindow.remember:
+                print dir(self.connection.auth_token)
+                self.settings["token"] = self.connection.auth_token.key
+                self.settings["key"] = self.connection.auth_token.secret
+                self.store_settings()
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
             self.logged_successfully()
         else: #we failed the login process
@@ -290,6 +295,9 @@ class GogTuxGUI:
         parser.set(section,"install_path", self.settings["install_path"])
         parser.set(section,"use_virtual_desktop", self.settings["use_virtual_desktop"])
         parser.set(section,"profile_update", self.settings["profile_update"])
+        if "token" in self.settings and "key" in self.settings:
+            parser.set(section,"token", self.settings["token"])
+            parser.set(section,"key", self.settings["key"])
         f = open(configfile,'w+')
         parser.write(f)
         f.close()
@@ -361,6 +369,7 @@ class LoginWindow:
                     "on_logindialog_close" : self.close,
                     "on_okbutton_activated" : self.do_login,
                     "on_okbutton_clicked" : self.do_login }
+        loginwin.connect("delete-event", self.close)
         self.loginglade.signal_autoconnect(signals)
         loginwin.show()
         self.parent = parent
@@ -371,6 +380,7 @@ class LoginWindow:
     def do_login(self, widget):
         email = self.loginglade.get_widget("emailtext").get_text().strip()
         password = self.loginglade.get_widget("passwordtext").get_text().strip()
+        self.remember = self.loginglade.get_widget("remembercheckbox").get_active()
         if not email or not password:
             self.parent.show_error("Please fill in all the fields")
             return

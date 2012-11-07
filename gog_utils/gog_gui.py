@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.5"
+version = "0.1.6"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -160,6 +160,27 @@ class GogTuxGUI:
     # because it's not installed yet, else this button would be
     # disabled
     def installbutton_activated(self, widget, data=None):
+        setup_file = None
+        yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION,
+                                  gtk.BUTTONS_YES_NO, "Do you want to use an already downloaded setup file?")
+        resp = yesno.run()
+        yesno.destroy()
+        if resp == gtk.RESPONSE_YES:
+            # we need to create a filter for the .exe files so we don't choose a wrong file
+            setupfilter = gtk.FileFilter()
+            setupfilter.set_name("GoG installer")
+            setupfilter.add_pattern("setup_*.exe")
+            chooser = gtk.FileChooserDialog(title="Setup executable", action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                                            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            chooser.set_default_response(gtk.RESPONSE_OK)
+            chooser.add_filter(setupfilter)
+            resp = chooser.run()
+            if resp == gtk.RESPONSE_OK:
+                setup_file = chooser.get_filename()
+                chooser.destroy()
+            else:
+                chooser.destroy()
+                return
         chooser = gtk.FileChooserDialog(title="Install directory", action=gtk.FILE_CHOOSER_ACTION_CREATE_FOLDER,
                                         buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
         chooser.set_current_folder(self.settings["install_path"])
@@ -168,7 +189,7 @@ class GogTuxGUI:
         resp = chooser.run()
         if resp == gtk.RESPONSE_OK:
             path = chooser.get_filename()
-            installwindow = ExternalOutputWindow(self,self.selected_game, True, path)
+            installwindow = ExternalOutputWindow(self,self.selected_game, True, path, setup_file)
         chooser.destroy()
 
     # We know the selected game is from the installed games list
@@ -417,7 +438,7 @@ class ExternalOutputWindow:
     working = True
     process = None
     
-    def __init__(self, parent, game_id, install=True, path=None):
+    def __init__(self, parent, game_id, install=True, path=None, installer=None):
         self.glade = gtk.glade.XML(os.path.join(package_directory, "externalwindow.glade"))
         self.window = self.glade.get_widget("externalwindow")
         self.textview = self.glade.get_widget("outputview")
@@ -436,7 +457,7 @@ class ExternalOutputWindow:
         self.game_id = game_id
         if install:
             self.window.set_title("Installing "+game_id)
-            self.launch_install(game_id, path)
+            self.launch_install(game_id, path, installer)
         else:
             self.window.set_title("Uninstalling "+game_id)
             self.button.set_label("Ok")
@@ -467,7 +488,7 @@ class ExternalOutputWindow:
         self.button.set_sensitive(True)
         self.spinner.stop()
 
-    def launch_install(self, game_id, path):
+    def launch_install(self, game_id, path, installer):
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         token = self.parent.connection.auth_token.key
         secret = self.parent.connection.auth_token.secret
@@ -475,6 +496,8 @@ class ExternalOutputWindow:
         cmd = "gog-installer --secret="+secret+" --token="+token
         if path != None:
             cmd += " --install-path="+path
+        if installer != None:
+            cmd += " --setup="+installer
         cmd += " "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()

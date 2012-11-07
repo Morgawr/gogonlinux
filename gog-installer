@@ -18,7 +18,7 @@ class Usage(Exception):
 
 def print_usage():
     # I know, this is ugly, apologies
-    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [-u|--uninstall] [-r|--run] <game_id>"
+    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] <game_id>"
     print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
           "       Typically you will want to run this program through the gog-tux graphical interface\n"
           "       instead of the command line directly.\n"
@@ -30,7 +30,8 @@ def print_usage():
           "                      location of the game (default is ~/games/gog/<game_id>)\n"
           "       -h/--help will show this info text again\n"
           "       -u/--uninstall is used if you want to uninstall a previously installed game\n"
-          "       -r/--run is used to launch the game from the command line without having to move into the target's directory")
+          "       -r/--run is used to launch the game from the command line without having to move into the target's directory\n"
+          "       --setup is used to specify a local setup file instead of downloading a new one from gog.com")
 
 #TODO: this one is copied from gog_gui, I should refactor them into a single module
 def load_settings(conf):
@@ -54,12 +55,13 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run","install-path="])
+            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run","install-path=","setup="])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
         token = ""
         secret = ""
+        setupfile = ""
         for o, a in opts:
             if o in ("-h", "--help"):
                 print_usage()
@@ -76,6 +78,8 @@ def main(argv=None):
             elif o in ("-r", "--run"):
                 do_launch(args)
                 return
+            elif o in ("--setup"):
+                setupfile = a
         general_path = os.path.join(os.getenv("HOME"),".gog-tux")
         config_path = os.path.join(general_path,"config")
         database_path = os.path.join(general_path,"db.json")
@@ -104,19 +108,29 @@ def main(argv=None):
                             " are correct and working")
         else:
             conn.set_auth_token(token,secret)
-        print "Retrieving installer..."
-        try:
-            setup = conn.download_game(game_id,"/tmp/")
-        except:
-            return 2
+        if setupfile == "":
+            print "Retrieving installer..."
+            deletesetup = True
+            try:
+                setup = conn.download_game(game_id,"/tmp/")
+            except:
+                return 2
+        else:
+            deletesetup = False
+            setup = setupfile
         print "Extracting data..."
+        # TODO: this will probably be changed when we get more complex games into the database
         # For the love of God do not touch this yet
         command = ("mkdir -p "+path+" && cd "+path+" && innoextract -q "+setup+" && rm -rf tmp && "
-                   "cd app && mv * .. && cd .. && rmdir app && rm "+setup)
+                   "cd app && mv * .. && cd .. && rmdir app ")
+        if deletesetup:
+            command += "&& rm "+setup
         #let's extract the file
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         shell.stdin.write(command+"\n")
         shell.communicate()
+        # TODO: we should check the return value of the script to make sure it worked fine else 
+        #       problems might ensue
         shell.stdin.close()
         print "Updating local database..."
         # Now we need to update the local database and download the install/uninstall scripts
@@ -143,7 +157,6 @@ def main(argv=None):
         if os.path.exists(database.games[game_id].install_script_file):
             print "Executing install script..."
             subprocess.call([database.games[game_id].install_script_file + " " + database.games[game_id].install_path], shell=True)
-
         print "Done."
         print database.games[game_id].full_name+" installed in "+path
 

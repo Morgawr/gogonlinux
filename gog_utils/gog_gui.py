@@ -160,7 +160,16 @@ class GogTuxGUI:
     # because it's not installed yet, else this button would be
     # disabled
     def installbutton_activated(self, widget, data=None):
-        installwindow = ExternalOutputWindow(self,self.selected_game) 
+        chooser = gtk.FileChooserDialog(title="Install directory", action=gtk.FILE_CHOOSER_ACTION_CREATE_FOLDER,
+                                        buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+        chooser.set_current_folder(self.settings["install_path"])
+        chooser.set_current_name(self.selected_game)
+        chooser.set_default_response(gtk.RESPONSE_OK)
+        resp = chooser.run()
+        if resp == gtk.RESPONSE_OK:
+            path = chooser.get_filename()
+            installwindow = ExternalOutputWindow(self,self.selected_game, True, path)
+        chooser.destroy()
 
     # We know the selected game is from the installed games list
     # else you wouldn't be able to launch it.
@@ -459,12 +468,14 @@ class ExternalOutputWindow:
         self.spinner.stop()
 
     def launch_install(self, game_id, path):
-        # Let's assume path is None since we haven't implemented this yet
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         token = self.parent.connection.auth_token.key
         secret = self.parent.connection.auth_token.secret
-        # this needs to be fixed TODO
-        cmd = "gog-installer --secret="+secret+" --token="+token+" "+game_id+"\nexit\n"
+        # If possible, I'd love this to be more elegant but so far it works
+        cmd = "gog-installer --secret="+secret+" --token="+token
+        if path != None:
+            cmd += " --install-path="+path
+        cmd += " "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
 

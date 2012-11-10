@@ -47,6 +47,7 @@ class GameRecord(json.JSONEncoder):
     install_path = None
     install_script = None
     uninstall_script = None
+    launch_script = None
     install_script_file = None
     uninstall_script_file = None
     online_id = None
@@ -61,6 +62,7 @@ class GameRecord(json.JSONEncoder):
             if "install_path" in data.keys():
                 self.install_path = data["install_path"]
             self.install_script = data["install_script"]
+            self.launch_script = data["launch_script"]
             self.uninstall_script = data["uninstall_script"]
             if "install_script_file" in data.keys():
                 self.install_script_file = data["install_script_file"]
@@ -80,6 +82,7 @@ class GameRecord(json.JSONEncoder):
         data["install_path"] = obj.install_path
         data["install_script"] = obj.install_script
         data["uninstall_script"] = obj.uninstall_script
+        data["launch_script"] = obj.launch_script
         data["install_script_file"] = obj.install_script_file
         data["uninstall_script_file"] = obj.uninstall_script_file
         data["online_id"] = obj.online_id

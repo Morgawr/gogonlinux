@@ -142,16 +142,20 @@ def main(argv=None):
         print "Retrieving game scripts from remote server..."
         if not os.path.exists(os.path.join(general_path,"scripts")):
             os.makedirs(os.path.join(general_path,"scripts"))
+        # XXX: All these "install_script"/"install_path" variable names are confusing, might go back to it and rename
         install_script = os.path.join(general_path,"scripts","install_"+game_id)
         uninstall_script = os.path.join(general_path,"scripts","uninstall_"+game_id)
+        launch_script = os.path.join(path,"startgame.sh")
         database.games[game_id].install_script_file = install_script
         database.games[game_id].uninstall_script_file = uninstall_script
         database.games[game_id].install_path = path
         database.games[game_id].online_id = game_id
         if database.games[game_id].install_script != "404":
-            site_conn.download_script(install_script,database.games[game_id].install_script)
+            site_conn.download_script(install_script, database.games[game_id].install_script)
         if database.games[game_id].uninstall_script != "404":
-            site_conn.download_script(uninstall_script,database.games[game_id].uninstall_script)
+            site_conn.download_script(uninstall_script, database.games[game_id].uninstall_script)
+        if database.games[game_id].launch_script != "404":
+            site_conn.download_script(launch_script, database.games[game_id].launch_script)
         database.store()
         # then we need to run the install script on the target's directory
         if os.path.exists(database.games[game_id].install_script_file):

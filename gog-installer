@@ -47,7 +47,6 @@ def load_settings(conf):
             sets[opt] = None
     return sets
 
-#TODO: add option for already existing setup file
 def main(argv=None):
     if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
         os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
@@ -93,22 +92,22 @@ def main(argv=None):
             raise Usage("Game is already installed in the database at "+ database.games[game_id].install_path)
         if path == "":
             path = os.path.join(settings["install_path"],game_id)
-        if token=="" or secret=="": # we need to ask for username and password instead
-            email = raw_input("gog.com email address: ")
-            password = getpass.getpass()
-            is_user = True
-        else:
-            is_user = False
-        conn = gog_conn.GogConnection()
-        if is_user:
-            try:
-                conn.connect(email,password)
-            except:
-                raise Usage("Login failed. Be sure you are connected to the internet and that your email and password"
-                            " are correct and working")
-        else:
-            conn.set_auth_token(token,secret)
         if setupfile == "":
+            if token=="" or secret=="": # we need to ask for username and password instead
+                email = raw_input("gog.com email address: ")
+                password = getpass.getpass()
+                is_user = True
+            else:
+                is_user = False
+            conn = gog_conn.GogConnection()
+            if is_user:
+                try:
+                    conn.connect(email,password)
+                except:
+                    raise Usage("Login failed. Be sure you are connected to the internet and that your email and password"
+                                " are correct and working")
+            else:
+                conn.set_auth_token(token,secret)
             print "Retrieving installer..."
             deletesetup = True
             try:

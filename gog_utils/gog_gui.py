@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.6"
+version = "0.1.7"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -160,6 +160,8 @@ class GogTuxGUI:
     # because it's not installed yet, else this button would be
     # disabled
     def installbutton_activated(self, widget, data=None):
+        if self.game_data[self.selected_game]["message"] != None:
+            self.show_warning(self.game_data[self.selected_game]["message"])
         setup_file = None
         yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION,
                                   gtk.BUTTONS_YES_NO, "Do you want to use an already downloaded setup file?")
@@ -287,6 +289,12 @@ class GogTuxGUI:
     def show_error(self, error):
         md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
                                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, error)
+        md.run()
+        md.destroy()
+
+    def show_warning(self, warning):
+        md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
+                               gtk.MESSAGE_WARNING, gtk.BUTTONS_CLOSE, warning)
         md.run()
         md.destroy()
 

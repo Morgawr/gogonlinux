@@ -4,7 +4,7 @@ import os
 import stat
 
 website_url = "http://www.gogonlinux.com"
-available_games = "/games/available"
+available_games = "/available"
 
 #returns the json list of all available games
 def obtain_available_games():
@@ -18,6 +18,10 @@ def obtain_install_url(game_id):
 def obtain_uninstall_url(game_id):
     data = obtain_available_games()
     return data[game_id]["uninstall_script"]
+
+def obtain_launch_url(game_id):
+    data = obtain_available_games()
+    return data[game_id]["launch_script"]
 
 def download_script(target, url):
     r = requests.get(url)

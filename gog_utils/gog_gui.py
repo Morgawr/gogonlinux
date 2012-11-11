@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.8"
+version = "0.1.9"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -491,7 +491,7 @@ class ExternalOutputWindow:
 
     def __threaded_execute(self, command, pipe):
         self.working = True
-        gobject.io_add_watch(pipe.stdout, gobject.IO_IN, self.read_output)
+        gobject.io_add_watch(pipe.stdout, gobject.IO_IN | gobject.IO_HUP, self.read_output)
         pipe.stdin.write(command)
         pipe.stdin.flush()
         pipe.wait()
@@ -506,7 +506,7 @@ class ExternalOutputWindow:
         token = self.parent.connection.auth_token.key
         secret = self.parent.connection.auth_token.secret
         # If possible, I'd love this to be more elegant but so far it works
-        cmd = "gog-installer --secret="+secret+" --token="+token
+        cmd = "python -u gog-installer --secret="+secret+" --token="+token
         if path != None:
             cmd += " --install-path="+path
         if installer != None:

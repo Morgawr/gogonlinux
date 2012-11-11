@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.7"
+version = "0.1.8"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -89,6 +89,7 @@ class GogTuxGUI:
         self.privatenotelabel = self.wTree.get_widget("privatenotelabel")
         self.profilepic = self.wTree.get_widget("profilepic")
         self.installpathentry = self.wTree.get_widget("installpathentry")
+        self.virtualresentry = self.wTree.get_widget("resolutionentry")
         self.virtualdesktopcheck = self.wTree.get_widget("virtualdesktopcheck")
         self.profileintervalentry = self.wTree.get_widget("profileintervalentry")
         self.launchbutton = self.wTree.get_widget("launchbutton")
@@ -319,6 +320,7 @@ class GogTuxGUI:
     def save_settings(self, widget):
         self.settings["install_path"] = self.installpathentry.get_text()
         self.settings["use_virtual_desktop"] = str(self.virtualdesktopcheck.get_active())
+        self.settings["virtual_resolution"] = self.virtualresentry.get_text()
         self.settings["profile_update"] = self.profileintervalentry.get_text()
         self.store_settings()
 
@@ -326,6 +328,7 @@ class GogTuxGUI:
     def undo_settings(self, widget):
         self.installpathentry.set_text(self.settings["install_path"])
         self.virtualdesktopcheck.set_active(self.settings["use_virtual_desktop"] == "True")
+        self.virtualresentry.set_text(self.settings["virtual_resolution"])
         self.profileintervalentry.set_text(str(self.settings["profile_update"]))
 
     def store_settings(self):
@@ -338,6 +341,7 @@ class GogTuxGUI:
         parser.add_section(section)
         parser.set(section,"install_path", self.settings["install_path"])
         parser.set(section,"use_virtual_desktop", self.settings["use_virtual_desktop"])
+        parser.set(section,"virtual_resolution", self.settings["virtual_resolution"])
         parser.set(section,"profile_update", self.settings["profile_update"])
         if "token" in self.settings and "key" in self.settings:
             parser.set(section,"token", self.settings["token"])
@@ -360,6 +364,7 @@ class GogTuxGUI:
         sets["install_path"] = os.path.join(os.getenv("HOME"),"games","gog")
         sets["use_virtual_desktop"] = False
         sets["profile_update"] = 120
+        sets["virtual_resolution"] = "800x600"
         return sets
 
     def load_settings(self, conf):

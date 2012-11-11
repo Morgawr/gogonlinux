@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name='gogonlinux',
-      version='0.1.7',
+      version='0.1.8',
       description='Client for GOG games on Linux',
       author='Morgawr',
       author_email='morgawr@gmail.com',

@@ -506,7 +506,7 @@ class ExternalOutputWindow:
         token = self.parent.connection.auth_token.key
         secret = self.parent.connection.auth_token.secret
         # If possible, I'd love this to be more elegant but so far it works
-        cmd = "python -u gog-installer --secret="+secret+" --token="+token
+        cmd = "gog-installer --secret="+secret+" --token="+token
         if path != None:
             cmd += " --install-path="+path
         if installer != None:

@@ -50,6 +50,7 @@ Without the following programs installed on your system you won't be able to
 install and run the games, so please install them before you run the gog client.
 
 - wine (http://www.winehq.org/) is required to run windows (.exe) gog.com games
+- winetricks is a wine script required to setup some wine games
 - scummvm (http://www.scummvm.org/) is required for some old adventure games
 - dosbox (http://www.dosbox.com/) is required for most old dos videogames
 - innoextract (http://constexpr.org/innoextract/) is required to extract and

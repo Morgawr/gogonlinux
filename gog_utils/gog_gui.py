@@ -189,7 +189,7 @@ class GogTuxGUI:
         resp = chooser.run()
         if resp == gtk.RESPONSE_OK:
             path = chooser.get_filename()
-            installwindow = ExternalOutputWindow(self,self.selected_game, True, path, setup_file)
+            installwindow = ExternalOutputWindow(self,self.selected_game, True, path, setup_file, self.have_beta_access == "True")
         chooser.destroy()
 
     # We know the selected game is from the installed games list
@@ -202,7 +202,7 @@ class GogTuxGUI:
 
     # Same assumption as with the launch button. :)
     def uninstallbutton_activated(self, widget, data=None):
-        uninstallwindow = ExternalOutputWindow(self, self.selected_game, False)
+        uninstallwindow = ExternalOutputWindow(self, self.selected_game, False, beta=(self.have_beta_access == "True"))
 
     # Shows the game card of the selected game. 
     # If the game is currently installed then it lets the user uninstall it or launch it
@@ -399,6 +399,8 @@ class GogTuxGUI:
         self.installedgameslist.clear()
         for game_id, game in self.database.games.items():
             if game.released == '0':
+                if self.have_beta_access != "True":
+                    continue
                 image = self.beta
             else:
                 image = self.compat[game.compat]
@@ -463,7 +465,7 @@ class ExternalOutputWindow:
     working = True
     process = None
     
-    def __init__(self, parent, game_id, install=True, path=None, installer=None):
+    def __init__(self, parent, game_id, install=True, path=None, installer=None, beta=False):
         self.glade = gtk.glade.XML(os.path.join(package_directory, "externalwindow.glade"))
         self.window = self.glade.get_widget("externalwindow")
         self.textview = self.glade.get_widget("outputview")
@@ -482,12 +484,12 @@ class ExternalOutputWindow:
         self.game_id = game_id
         if install:
             self.window.set_title("Installing "+game_id)
-            self.launch_install(game_id, path, installer)
+            self.launch_install(game_id, path, installer, beta)
         else:
             self.window.set_title("Uninstalling "+game_id)
             self.button.set_label("Ok")
             self.button.set_sensitive(False)
-            self.launch_uninstall(game_id)
+            self.launch_uninstall(game_id, beta)
 
     def read_output(self, source, condition):
         if condition == gobject.IO_IN:
@@ -513,12 +515,16 @@ class ExternalOutputWindow:
         self.button.set_sensitive(True)
         self.spinner.stop()
 
-    def launch_install(self, game_id, path, installer):
+    def launch_install(self, game_id, path, installer, beta):
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         token = self.parent.connection.auth_token.key
         secret = self.parent.connection.auth_token.secret
+        if beta:
+            beta_string = "--beta "
+        else:
+            beta_string = ""
         # If possible, I'd love this to be more elegant but so far it works
-        cmd = "gog-installer --secret="+secret+" --token="+token
+        cmd = "gog-installer "+beta_string+"--secret="+secret+" --token="+token
         if path != None:
             cmd += " --install-path="+path
         if installer != None:
@@ -527,9 +533,13 @@ class ExternalOutputWindow:
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
 
-    def launch_uninstall(self, game_id):
+    def launch_uninstall(self, game_id, beta):
+        if beta:
+            beta_string = "--beta "
+        else:
+            beta_string = ""
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        cmd = "gog-installer -u "+game_id+"\nexit\n"
+        cmd = "gog-installer "+beta_string+"-u "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
 
@@ -539,7 +549,7 @@ class ExternalOutputWindow:
 
     # this is called when we need to stop an install, we call the appropriate uninstall
     def stop_install(self):
-        ExternalOutputWindow(self.parent, self.game_id, False)
+        ExternalOutputWindow(self.parent, self.game_id, False, beta=(self.have_beta_access == "True"))
 
     def do_action(self, widget, data=None):
         if self.working: # If we need to cancel the action

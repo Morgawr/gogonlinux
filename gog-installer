@@ -139,7 +139,7 @@ def main(argv=None):
         # Now we need to update the local database and download the install/uninstall scripts
         if not beta:
             data = site_conn.obtain_available_games()
-        else
+        else:
             data = site_conn.obtain_beta_available_games()
         game_data = data[game_id]
         game = gog_db.GameRecord(game_data["title"],game_data)

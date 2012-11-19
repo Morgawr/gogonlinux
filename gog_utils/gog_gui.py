@@ -65,9 +65,9 @@ class GogTuxGUI:
         #set up the lists for the games 
         self.init_lists()
         #finalize initialization
-        self.load_games()
         self.acquire_settings()
         self.have_beta_access = self.settings["access_beta"]
+        self.load_games()
         if self.check_cookies():
             token, key = self.obtain_cookies()
             self.connection.set_auth_token(token, key)
@@ -87,7 +87,7 @@ class GogTuxGUI:
         self.installpathentry = self.wTree.get_widget("installpathentry")
         self.virtualresentry = self.wTree.get_widget("resolutionentry")
         self.virtualdesktopcheck = self.wTree.get_widget("virtualdesktopcheck")
-        self.betasofwarecheck = self.wTree.get_widget("betasoftwarecheck")
+        self.betasoftwarecheck = self.wTree.get_widget("betasoftwarecheck")
         self.profileintervalentry = self.wTree.get_widget("profileintervalentry")
         self.launchbutton = self.wTree.get_widget("launchbutton")
         self.installbutton = self.wTree.get_widget("installbutton")

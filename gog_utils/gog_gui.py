@@ -388,7 +388,7 @@ class GogTuxGUI:
             self.game_data = site_conn.obtain_available_games()
         for name, content in self.game_data.items():
             if content["released"] == '0':
-                image = beta
+                image = self.beta
             else:
                 image = self.compat[content["compat"]]
             self.availgameslist.append((content["title"],content["emulation"],image,name))
@@ -399,7 +399,7 @@ class GogTuxGUI:
         self.installedgameslist.clear()
         for game_id, game in self.database.games.items():
             if game.released == '0':
-                image = beta
+                image = self.beta
             else:
                 image = self.compat[game.compat]
             self.installedgameslist.append((game.full_name, game.emulation, image, game_id))

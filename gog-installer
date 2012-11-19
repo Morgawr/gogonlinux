@@ -18,7 +18,7 @@ class Usage(Exception):
 
 def print_usage():
     # I know, this is ugly, apologies
-    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] <game_id>"
+    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] [--beta] <game_id>"
     print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
           "       Typically you will want to run this program through the gog-tux graphical interface\n"
           "       instead of the command line directly.\n"
@@ -31,7 +31,8 @@ def print_usage():
           "       -h/--help will show this info text again\n"
           "       -u/--uninstall is used if you want to uninstall a previously installed game\n"
           "       -r/--run is used to launch the game from the command line without having to move into the target's directory\n"
-          "       --setup is used to specify a local setup file instead of downloading a new one from gog.com")
+          "       --setup is used to specify a local setup file instead of downloading a new one from gog.com\n"
+          "       --beta enables support for beta testing versions of games on gogonlinux.com")
 
 #TODO: this one is copied from gog_gui, I should refactor them into a single module
 def load_settings(conf):
@@ -54,13 +55,14 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run","install-path=","setup="])
+            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run","install-path=","setup=","beta"])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
         token = ""
         secret = ""
         setupfile = ""
+        beta = False
         for o, a in opts:
             if o in ("-h", "--help"):
                 print_usage()
@@ -79,6 +81,8 @@ def main(argv=None):
                 return
             elif o in ("--setup"):
                 setupfile = a
+            elif o in ("--beta"):
+                beta = True;
         general_path = os.path.join(os.getenv("HOME"),".gog-tux")
         config_path = os.path.join(general_path,"config")
         database_path = os.path.join(general_path,"db.json")
@@ -133,7 +137,10 @@ def main(argv=None):
         shell.stdin.close()
         print "Updating local database..."
         # Now we need to update the local database and download the install/uninstall scripts
-        data = site_conn.obtain_available_games()
+        if not beta:
+            data = site_conn.obtain_available_games()
+        else
+            data = site_conn.obtain_beta_available_games()
         game_data = data[game_id]
         game = gog_db.GameRecord(game_data["title"],game_data)
         database.add_game(game_id,game)

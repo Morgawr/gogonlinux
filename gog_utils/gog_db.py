@@ -55,6 +55,7 @@ class GameRecord(json.JSONEncoder):
     emulation = None
     cover_url = None
     compat = "red"
+    released = '1'
 
     def __init__(self, name, data=None):
         self.full_name = name
@@ -72,6 +73,8 @@ class GameRecord(json.JSONEncoder):
                 self.online_id = data["online_id"]
             if "full_name" in data.keys():
                 self.full_name = data["full_name"]
+            if "released" in data.keys():
+                self.released = data["released"]
             self.emulation = data["emulation"]
             self.cover_url = data["cover_url"]
             self.compat = data["compat"]
@@ -90,5 +93,6 @@ class GameRecord(json.JSONEncoder):
         data["cover_url"] = obj.cover_url
         data["compat"] = obj.compat
         data["full_name"] = obj.full_name
+        data["released"] = obj.released
         return data
 

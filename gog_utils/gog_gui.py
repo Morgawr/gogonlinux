@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.9"
+version = "0.1.10"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -26,13 +26,10 @@ class GogTuxGUI:
     
     #some image data
     compat = {}
-    compat["green"] = gtk.Image()
-    compat["green"].set_from_file(os.path.join(package_directory,"imgdata","green_compat.png"))
     compat["green"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","green_compat.png"))
-    compat["yellow"] = gtk.Image()
     compat["yellow"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","yellow_compat.png"))
-    compat["red"] = gtk.Image()
     compat["red"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","red_compat.png"))
+    beta = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","beta.png"))
 
     #some other default stuff
     islogged = False
@@ -53,9 +50,7 @@ class GogTuxGUI:
         signals = { "on_gog_tux_destroy" : gtk.main_quit,
                     "on_close_menu_activated" : gtk.main_quit,
                     "on_about_menu_activated" : self.about_menu_activated,
-#                    "on_undoprefsbutton_activated" : self.undo_settings,
                     "on_undoprefsbutton_clicked" : self.undo_settings,
-#                    "on_saveprefsbutton_activated" : self.save_settings,
                     "on_saveprefsbutton_clicked" : self.save_settings,
                     "on_gog_tux_key_pressed" : self.key_pressed,
                     "on_installbutton_activated" : self.installbutton_activated,
@@ -72,6 +67,7 @@ class GogTuxGUI:
         #finalize initialization
         self.load_games()
         self.acquire_settings()
+        self.have_beta_access = self.settings["access_beta"]
         if self.check_cookies():
             token, key = self.obtain_cookies()
             self.connection.set_auth_token(token, key)
@@ -91,6 +87,7 @@ class GogTuxGUI:
         self.installpathentry = self.wTree.get_widget("installpathentry")
         self.virtualresentry = self.wTree.get_widget("resolutionentry")
         self.virtualdesktopcheck = self.wTree.get_widget("virtualdesktopcheck")
+        self.betasofwarecheck = self.wTree.get_widget("betasoftwarecheck")
         self.profileintervalentry = self.wTree.get_widget("profileintervalentry")
         self.launchbutton = self.wTree.get_widget("launchbutton")
         self.installbutton = self.wTree.get_widget("installbutton")
@@ -322,6 +319,7 @@ class GogTuxGUI:
         self.settings["use_virtual_desktop"] = str(self.virtualdesktopcheck.get_active())
         self.settings["virtual_resolution"] = self.virtualresentry.get_text()
         self.settings["profile_update"] = self.profileintervalentry.get_text()
+        self.settings["access_beta"] = str(self.betasoftwarecheck.get_active())
         self.store_settings()
 
     #we revert to the unmodified settings
@@ -330,6 +328,7 @@ class GogTuxGUI:
         self.virtualdesktopcheck.set_active(self.settings["use_virtual_desktop"] == "True")
         self.virtualresentry.set_text(self.settings["virtual_resolution"])
         self.profileintervalentry.set_text(str(self.settings["profile_update"]))
+        self.betasoftwarecheck.set_active(self.settings["access_beta"] == "True")
 
     def store_settings(self):
         path = os.path.join(os.getenv("HOME"),".gog-tux")
@@ -343,6 +342,7 @@ class GogTuxGUI:
         parser.set(section,"use_virtual_desktop", self.settings["use_virtual_desktop"])
         parser.set(section,"virtual_resolution", self.settings["virtual_resolution"])
         parser.set(section,"profile_update", self.settings["profile_update"])
+        parser.set(section,"access_beta", self.settings["access_beta"])
         if "token" in self.settings and "key" in self.settings:
             parser.set(section,"token", self.settings["token"])
             parser.set(section,"key", self.settings["key"])
@@ -365,6 +365,7 @@ class GogTuxGUI:
         sets["use_virtual_desktop"] = False
         sets["profile_update"] = 120
         sets["virtual_resolution"] = "800x600"
+        sets["access_beta"] = False
         return sets
 
     def load_settings(self, conf):
@@ -381,16 +382,27 @@ class GogTuxGUI:
         return sets
 
     def do_load_games(self):
-        self.game_data = site_conn.obtain_available_games()
+        if self.have_beta_access == "True":
+            self.game_data = site_conn.obtain_beta_available_games()
+        else:
+            self.game_data = site_conn.obtain_available_games()
         for name, content in self.game_data.items():
-            self.availgameslist.append((content["title"],content["emulation"],self.compat[content["compat"]],name))
+            if content["released"] == '0':
+                image = beta
+            else:
+                image = self.compat[content["compat"]]
+            self.availgameslist.append((content["title"],content["emulation"],image,name))
         self.refresh_local_list()
     
     def refresh_local_list(self):
         self.database.update()
         self.installedgameslist.clear()
         for game_id, game in self.database.games.items():
-            self.installedgameslist.append((game.full_name, game.emulation, self.compat[game.compat], game_id))
+            if game.released == '0':
+                image = beta
+            else:
+                image = self.compat[game.compat]
+            self.installedgameslist.append((game.full_name, game.emulation, image, game_id))
         self.installedgamestree.get_selection().unselect_all()
         self.availablegamestree.get_selection().unselect_all()
         self.rightpanel.hide()

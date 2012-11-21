@@ -548,6 +548,8 @@ class ExternalOutputWindow:
         pipe.stdin.flush()
         pipe.wait()
         pipe.stdin.close()
+        if pipe.returncode == 3: # This means we failed to fetch an installer from gog.com
+            self.buf.insert_at_cursor("You do not have the permission required to install this game.")
         self.working = False
         self.button.set_label("Ok")
         self.button.set_sensitive(True)
@@ -565,7 +567,7 @@ class ExternalOutputWindow:
             cmd += " --setup="+installer
         else:
             token = self.parent.connection.auth_token.key
-            secret = self.parent.connectin.auth_token.secret
+            secret = self.parent.connection.auth_token.secret
             cmd += "--secret="+secret+" --token="+token
         cmd += " "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))

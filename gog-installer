@@ -59,6 +59,11 @@ def load_settings(conf):
     return sets
 
 def main(argv=None):
+    #first we set up unbuffered output in case we need to print to GUI (gog-tux)
+    unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    sys.stdout.close()
+    sys.stdout = unbuffered
+
     if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
         os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
     if argv is None:
@@ -132,7 +137,8 @@ def main(argv=None):
             try:
                 setup = conn.download_game(game_id,"/tmp/")
             except:
-                return 2
+                print "Couldn't fetch installer, exiting install process"
+                return 3
         else:
             deletesetup = False
             setup = setupfile

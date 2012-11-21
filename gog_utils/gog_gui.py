@@ -14,10 +14,10 @@ import ConfigParser
 import subprocess
 import gog_db
 import gol_connection as site_conn
+from version import version
+from version import author
+from version import email
 
-version = "0.1.11"
-author = "Morgawr"
-email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
 dbpath = os.path.join(os.getenv("HOME"), ".gog-tux", "db.json")
 gobject.threads_init()

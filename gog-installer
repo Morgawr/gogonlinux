@@ -1,8 +1,12 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 
 from gog_utils import gog_conn
 from gog_utils import gol_connection as site_conn
 from gog_utils import gog_db
+from gog_utils import version
+#from version import author as author
+#from version import email as author_email
+#from version import version as version
 
 import sys
 import getopt
@@ -18,7 +22,7 @@ class Usage(Exception):
 
 def print_usage():
     # I know, this is ugly, apologies
-    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] [--beta] <game_id>"
+    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] [--beta] [--version] <game_id>"
     print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
           "       Typically you will want to run this program through the gog-tux graphical interface\n"
           "       instead of the command line directly.\n"
@@ -32,7 +36,13 @@ def print_usage():
           "       -u/--uninstall is used if you want to uninstall a previously installed game\n"
           "       -r/--run is used to launch the game from the command line without having to move into the target's directory\n"
           "       --setup is used to specify a local setup file instead of downloading a new one from gog.com\n"
-          "       --beta enables support for beta testing versions of games on gogonlinux.com")
+          "       --beta enables support for beta testing versions of games on gogonlinux.com\n"
+          "       --version prints version details for this software")
+
+def show_version():
+    print "gog-installer application version " + version.version
+    print "developed by " + version.author + " <" + version.email + ">"
+    print "see more info with the --help flag"
 
 #TODO: this one is copied from gog_gui, I should refactor them into a single module
 def load_settings(conf):
@@ -55,7 +65,9 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall","run","install-path=","setup=","beta"])
+            opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall",
+                                                         "run","install-path=","setup=","beta",
+                                                         "version"])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
@@ -83,6 +95,9 @@ def main(argv=None):
                 setupfile = a
             elif o in ("--beta"):
                 beta = True;
+            elif o in ("--version"):
+                show_version()
+                return
         general_path = os.path.join(os.getenv("HOME"),".gog-tux")
         config_path = os.path.join(general_path,"config")
         database_path = os.path.join(general_path,"db.json")

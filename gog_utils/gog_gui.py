@@ -36,6 +36,8 @@ class GogTuxGUI:
     game_data = {} # list of all available games from the website
     selected_game = None
 
+    window_base_title = "(unofficial) Gog Linux Client"
+
 
     def __init__(self, connection):
         self.connection = connection
@@ -56,7 +58,8 @@ class GogTuxGUI:
                     "on_installbutton_activated" : self.installbutton_activated,
                     "on_launchbutton_activated" : self.launchbutton_activated,
                     "on_uninstallbutton_activated" : self.uninstallbutton_activated,
-                    "on_logoutmenu_activated" : self.do_logout }
+                    "on_logoutmenu_activated" : self.do_logout,
+                    "on_loginmenu_activated" : self.do_login }
         self.wTree.signal_autoconnect(signals)
         #obtain required resources
         self.window = self.wTree.get_widget("gog_tux")
@@ -73,7 +76,8 @@ class GogTuxGUI:
             self.connection.set_auth_token(token, key)
             self.logged_successfully()
         else:
-            self.loginwindow = LoginWindow(self)
+            self.do_logout(None)
+        self.window.show()
         self.undo_settings(None)
 
     # Performs initialization of some gui elements storing them in the class
@@ -96,6 +100,10 @@ class GogTuxGUI:
         self.gameinstalledlabel = self.wTree.get_widget("installedlabel")
         self.gameemulationlabel = self.wTree.get_widget("emulationlabel")
         self.gamecoverimage = self.wTree.get_widget("coverimage")
+        self.loginmenu = self.wTree.get_widget("loginmenu")
+        self.logoutmenu = self.wTree.get_widget("logoutmenu")
+        self.profiletablabel = self.wTree.get_widget("profiletablabel")
+        self.profiletabpage = self.wTree.get_widget("profiletabpage")
         
     # Performs initialization of the available and installed games lists
     def init_lists(self):
@@ -163,11 +171,12 @@ class GogTuxGUI:
         if self.game_data[self.selected_game]["message"] != None:
             self.show_warning(self.game_data[self.selected_game]["message"])
         setup_file = None
-        yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION,
-                                  gtk.BUTTONS_YES_NO, "Do you want to use an already downloaded setup file?")
-        resp = yesno.run()
-        yesno.destroy()
-        if resp == gtk.RESPONSE_YES:
+        if self.islogged == True:
+            yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION,
+                                      gtk.BUTTONS_YES_NO, "Do you want to use an already downloaded setup file?")
+            resp = yesno.run()
+            yesno.destroy()
+        if self.islogged == False or resp == gtk.RESPONSE_YES:
             # we need to create a filter for the .exe files so we don't choose a wrong file
             setupfilter = gtk.FileFilter()
             setupfilter.set_name("GoG installer")
@@ -204,7 +213,12 @@ class GogTuxGUI:
 
     # Same assumption as with the launch button. :)
     def uninstallbutton_activated(self, widget, data=None):
-        uninstallwindow = ExternalOutputWindow(self, self.selected_game, False, beta=(self.have_beta_access == "True"))
+        yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION,
+                                  gtk.BUTTONS_YES_NO, "You're about to uninstall " + self.selected_game + ", do you wish to continue?")
+        resp = yesno.run()
+        yesno.destroy()
+        if resp == gtk.RESPONSE_YES:        
+            uninstallwindow = ExternalOutputWindow(self, self.selected_game, False, beta=(self.have_beta_access == "True"))
 
     # Shows the game card of the selected game. 
     # If the game is currently installed then it lets the user uninstall it or launch it
@@ -230,11 +244,24 @@ class GogTuxGUI:
         if data.keyval == gtk.keysyms.Escape:
             self.rightpanel.hide()
 
+    def do_login(self, widget):
+        self.loginwindow = LoginWindow(self)
+
     def do_logout(self, widget):
-        del(self.settings["token"])
-        del(self.settings["key"])
-        self.store_settings()
-        gtk.main_quit()
+        settings_changed = False
+        if "token" in self.settings.keys():
+            settings_changed = True
+            del(self.settings["token"])
+        if "secret" in self.settings.keys():
+            settings_changed = True
+            del(self.settings["key"])
+        self.islogged = False
+        self.loginmenu.set_sensitive(True)
+        self.logoutmenu.set_sensitive(False)
+        self.window.set_title(self.window_base_title+" - Offline Mode")
+        self.profiletabpage.hide()
+        if settings_changed == True:
+            self.store_settings()
     
     def login_callback(self):
         if self.loginwindow.result == "Success": #we logged in successfully
@@ -244,15 +271,17 @@ class GogTuxGUI:
                 self.store_settings()
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
             self.logged_successfully()
-        elif self.loginwindow.result == "Destroy": #we close the login dialog
-            gtk.main_quit()
+        elif self.loginwindow.result == "Destroy": #we close the login dialog without logging in
+            self.loginwindow.loginglade.get_widget("logindialog").destroy()
         else: #we failed the login process
             self.loginwindow.loginglade.get_widget("okbutton").set_sensitive(True)
             self.show_error(self.loginwindow.result)
 
     def logged_successfully(self):
-        self.window.show()
         self.islogged = True
+        self.loginmenu.set_sensitive(False)
+        self.logoutmenu.set_sensitive(True)
+        self.profiletabpage.show()
         self.profile_update()
 
     def profile_update(self):
@@ -262,8 +291,12 @@ class GogTuxGUI:
             self.show_error("There was a connection problem with the login page. Live profile update will be disabled.\n"
                             "Please relog/restart the client.")
             return False
+
+        if not self.islogged:
+            return False
         self.accountlabel.set_text(self.user.name)
         self.emaillabel.set_text(self.user.email)
+        self.window.set_title(self.window_base_title+" - Logged in as: "+self.user.name)
         if self.user.forum != "0":
             self.forumnotelabel.set_text(self.user.forum)
         else:
@@ -443,8 +476,6 @@ class LoginWindow:
 
     def close(self, widget, data=None):
         self.result = "Destroy"
-        #gtk.main_quit()
-        #self.parent.window.destroy()
         self.parent.login_callback()
  
     def do_login(self, widget):
@@ -524,18 +555,18 @@ class ExternalOutputWindow:
 
     def launch_install(self, game_id, path, installer, beta):
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        token = self.parent.connection.auth_token.key
-        secret = self.parent.connection.auth_token.secret
-        if beta:
-            beta_string = "--beta "
-        else:
-            beta_string = ""
         # If possible, I'd love this to be more elegant but so far it works
-        cmd = "gog-installer "+beta_string+"--secret="+secret+" --token="+token
+        cmd = "gog-installer "
+        if beta:
+            cmd += "--beta "
         if path != None:
-            cmd += " --install-path="+path
+            cmd += "--install-path="+path+" "
         if installer != None:
             cmd += " --setup="+installer
+        else:
+            token = self.parent.connection.auth_token.key
+            secret = self.parent.connectin.auth_token.secret
+            cmd += "--secret="+secret+" --token="+token
         cmd += " "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()

@@ -31,6 +31,16 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
+                      <widget class="GtkMenuItem" id="loginmenu">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">Log in</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_loginmenu_activated" swapped="no"/>
+                      </widget>
+                    </child>
+                    <child>
                       <widget class="GtkMenuItem" id="logoutmenu">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -154,7 +164,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkFixed" id="fixed2">
+                  <widget class="GtkFixed" id="profiletabpage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
@@ -308,7 +318,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkLabel" id="label6">
+                  <widget class="GtkLabel" id="profiletablabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Profile</property>

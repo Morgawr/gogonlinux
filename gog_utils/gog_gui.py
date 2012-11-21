@@ -15,7 +15,7 @@ import subprocess
 import gog_db
 import gol_connection as site_conn
 
-version = "0.1.10"
+version = "0.1.11"
 author = "Morgawr"
 email = "morgawr@gmail.com"
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -119,6 +119,8 @@ class GogTuxGUI:
         # 3 is the game id in the lookup dictionary, not going to be displayed, just used for retrieval
         self.availgameslist = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gtk.gdk.Pixbuf, gobject.TYPE_STRING)
         self.installedgameslist = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gtk.gdk.Pixbuf, gobject.TYPE_STRING)
+        self.availgameslist.set_sort_column_id(0,gtk.SORT_ASCENDING)
+        self.installedgameslist.set_sort_column_id(0,gtk.SORT_ASCENDING)
         self.availablegamestree.set_model(self.availgameslist)
         self.availablegamestree.append_column(columna)
         self.availablegamestree.append_column(columnb)
@@ -242,6 +244,8 @@ class GogTuxGUI:
                 self.store_settings()
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
             self.logged_successfully()
+        elif self.loginwindow.result == "Destroy": #we close the login dialog
+            gtk.main_quit()
         else: #we failed the login process
             self.loginwindow.loginglade.get_widget("okbutton").set_sensitive(True)
             self.show_error(self.loginwindow.result)
@@ -436,9 +440,12 @@ class LoginWindow:
         self.loginglade.signal_autoconnect(signals)
         loginwin.show()
         self.parent = parent
+
     def close(self, widget, data=None):
-        gtk.main_quit()
-        self.parent.window.destroy()
+        self.result = "Destroy"
+        #gtk.main_quit()
+        #self.parent.window.destroy()
+        self.parent.login_callback()
  
     def do_login(self, widget):
         email = self.loginglade.get_widget("emailtext").get_text().strip()

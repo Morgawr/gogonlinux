@@ -12,6 +12,8 @@ import data_handle
 import urllib2
 import ConfigParser
 import subprocess
+import shutil
+
 import gog_db
 import gol_connection as site_conn
 from version import version
@@ -520,6 +522,7 @@ class ExternalOutputWindow:
         self.parent = parent
         self.install_mode = install
         self.game_id = game_id
+        self.path = path
         if install:
             self.window.set_title("Installing "+game_id)
             self.launch_install(game_id, path, installer, beta)
@@ -587,9 +590,10 @@ class ExternalOutputWindow:
         self.parent.refresh_local_list()
         self.window.destroy()
 
-    # this is called when we need to stop an install, we call the appropriate uninstall
     def stop_install(self):
-        ExternalOutputWindow(self.parent, self.game_id, False, beta=(self.have_beta_access == "True"))
+        shutil.rmtree(self.path)  
+        #ExternalOutputWindow(self.parent, self.game_id, False)
+        self.cleanup()
 
     def do_action(self, widget, data=None):
         if self.working: # If we need to cancel the action

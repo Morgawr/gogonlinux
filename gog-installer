@@ -20,9 +20,14 @@ class Usage(Exception):
     def __init__(self, msg):
         self.msg = msg
 
+general_path = os.path.join(os.getenv("HOME"),".gog-tux")
+config_path = os.path.join(general_path,"config")
+database_path = os.path.join(general_path,"db.json")
+        
+
 def print_usage():
     # I know, this is ugly, apologies
-    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] [--beta] [--version] <game_id>"
+    print "Usage: gog-installer [--token=<token> --secret=<secret>] [--install-path=<path>] [--setup=<setup.exe>] [-u|--uninstall] [-r|--run] [--list] [--available] [--beta] [--version] <game_id>"
     print ("       This program is to be used as a downloader+installer for gogonlinux.com games.\n"
           "       Typically you will want to run this program through the gog-tux graphical interface\n"
           "       instead of the command line directly.\n"
@@ -37,7 +42,9 @@ def print_usage():
           "       -r/--run is used to launch the game from the command line without having to move into the target's directory\n"
           "       --setup is used to specify a local setup file instead of downloading a new one from gog.com\n"
           "       --beta enables support for beta testing versions of games on gogonlinux.com\n"
-          "       --version prints version details for this software")
+          "       --version prints version details for this software\n"
+          "       --list shows the list of installed games and their pathname\n"
+          "       --available shows all the available games on gogonlinux.com")
 
 def show_version():
     print "gog-installer application version " + version.version
@@ -72,7 +79,7 @@ def main(argv=None):
         try: 
             opts, args = getopt.getopt(argv[1:], "hur", ["help","token=","secret=","uninstall",
                                                          "run","install-path=","setup=","beta",
-                                                         "version"])
+                                                         "version","list","available"])
         except getopt.error, msg:
             raise Usage(msg)
         path = ""
@@ -80,6 +87,8 @@ def main(argv=None):
         secret = ""
         setupfile = ""
         beta = False
+        show_list = False
+        show_avail = False
         for o, a in opts:
             if o in ("-h", "--help"):
                 print_usage()
@@ -99,13 +108,24 @@ def main(argv=None):
             elif o in ("--setup"):
                 setupfile = a
             elif o in ("--beta"):
-                beta = True;
+                beta = True
             elif o in ("--version"):
                 show_version()
                 return
-        general_path = os.path.join(os.getenv("HOME"),".gog-tux")
-        config_path = os.path.join(general_path,"config")
-        database_path = os.path.join(general_path,"db.json")
+            elif o in ("--list"):
+                show_list = True
+            elif o in ("--available"):
+                show_avail = True
+
+        if show_list:
+            print_list()
+            return
+        if show_avail: 
+            print_avail(beta)
+            return
+        global general_path
+        global config_path
+        global database_path
         if len(args) == 0:
             raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
         game_id = args[0]
@@ -198,9 +218,9 @@ def main(argv=None):
     return 0
 
 def do_uninstall(args):
-    general_path = os.path.join(os.getenv("HOME"),".gog-tux")
-    config_path = os.path.join(general_path,"config")
-    database_path = os.path.join(general_path,"db.json")
+    global general_path
+    global config_path
+    global database_path
     if len(args) == 0:
         raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
     game_id = args[0]
@@ -228,9 +248,8 @@ def do_uninstall(args):
 
 #TODO: eventually merge do_launch and do_uninstall under the same wrapper
 def do_launch(args):
-    general_path = os.path.join(os.getenv("HOME"),".gog-tux")
-    config_path = os.path.join(general_path,"config")
-    database_path = os.path.join(general_path,"db.json")
+    global config_path
+    global database_path
     if len(args) == 0:
         raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
     game_id = args[0]
@@ -242,6 +261,30 @@ def do_launch(args):
     game = database.games[game_id]
     startup = os.path.join(game.install_path,"startgame.sh")
     subprocess.Popen([startup])       
+
+def print_list():
+    database = gog_db.GogDatabase(database_path)
+    database.update()
+    for k in database.games.keys():
+        print " ----------- "
+        print "Game ID: " + k 
+        print "Game Title: " + database.games[k].full_name
+        print "Install Path: " + database.games[k].install_path
+    print " ----------- "
+
+def print_avail(beta):
+    if not beta:
+        data = site_conn.obtain_available_games()
+    else:
+        data = site_conn.obtain_beta_available_games()
+    for k in data.keys():
+        print " ----------- "
+        print "Game ID: " + k
+        print "Game Title: " + data[k]["title"]
+        if beta:
+            print "Beta Status: " + ("No " if data[k]["released"] == "1" else "Yes" )
+
+    print " ----------- "
 
 if __name__ == "__main__":
     sys.exit(main())

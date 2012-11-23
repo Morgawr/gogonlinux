@@ -8,6 +8,7 @@ import subprocess
 import shutil
 import getpass
 import tempfile
+from distutils import dir_util
 
 from gog_utils import gog_conn
 from gog_utils import gol_connection as site_conn
@@ -160,14 +161,10 @@ def main(argv=None):
         else:
             deletesetup = False
             setup = setupfile
+
         print "Extracting data..."
-        # TODO: this will probably be changed when we get more complex games into the database
-        # For the love of God do not touch this yet
-        # XXX: I'm going to change this using real python calls instead of a huge jumbled mess of command line scripting
-        command = ("mkdir -p %s && cd %s && innoextract -q %s && rm -rf tmp && "
-                   "cd app && mv * .. && cd .. && rmdir app " % (path, path, setup))
-        if deletesetup:
-            command += "&& rm %s" % setup
+        os.makedirs(path)
+        command = "cd %s && innoextract -q %s" % (path, setup)
         #let's extract the file
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         shell.stdin.write(command+"\n")
@@ -175,6 +172,11 @@ def main(argv=None):
         # TODO: we should check the return value of the script to make sure it worked fine else 
         #       problems might ensue
         shell.stdin.close()
+        shutil.rmtree(os.path.join(path,"tmp"))
+        dir_util.copy_tree(os.path.join(path,"app"),path)
+        shutil.rmtree(os.path.join(path,"app"))
+        if deletesetup:
+            os.remove(setup)
         print "Updating local database..."
         # Now we need to update the local database and download the install/uninstall scripts
         if not beta:
@@ -206,7 +208,7 @@ def main(argv=None):
         # then we need to run the install script on the target's directory
         if os.path.exists(database.games[game_id].install_script_file):
             print "Executing install script..."
-            subprocess.call("%s %s" % ([database.games[game_id].install_script_file, database.games[game_id].install_path]), shell=True)
+            subprocess.call("%s %s" % (database.games[game_id].install_script_file, database.games[game_id].install_path), shell=True)
         print "Done."
         print "%s installed in %s" % (database.games[game_id].full_name, path)
 
@@ -232,7 +234,7 @@ def do_uninstall(args):
     path = database.games[game_id].install_path
     if database.games[game_id].uninstall_script != "404" and os.path.exists(database.games[game_id].uninstall_script_file):
         uninstall_script = os.path.join(general_path,"scripts","uninstall_"+game_id)
-        subprocess.call("%s %s" % ([database.games[game_id].uninstall_script_file, database.games[game_id].install_path]), shell=True)
+        subprocess.call("%s %s" % (database.games[game_id].uninstall_script_file, database.games[game_id].install_path), shell=True)
     print "Removing remaining files..."
     shutil.rmtree(path)
     if os.path.isfile(database.games[game_id].install_script_file):

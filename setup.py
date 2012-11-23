@@ -16,5 +16,7 @@ setup(name='gogonlinux',
       long_description=("This a linux porting attempt for gog.com games. It offers compatibility patches "
                         "and an easy to setup and install/uninstall package for all gog games. "
                         "A gog account is required."),
+      data_files=[('/usr/local/share/applications/',['data/gog-tux.desktop']),
+                  ('/usr/local/share/icons/',['gog_utils/imgdata/gog-tux-icon.svg'])],
       platforms=['GNU/Linux']
       )

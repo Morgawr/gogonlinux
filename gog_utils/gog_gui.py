@@ -32,6 +32,7 @@ class GogTuxGUI:
     compat["yellow"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","yellow_compat.png"))
     compat["red"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","red_compat.png"))
     beta = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","beta.png"))
+    icon = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","gog-tux-icon.svg"))
 
     #some other default stuff
     islogged = False
@@ -106,6 +107,7 @@ class GogTuxGUI:
         self.logoutmenu = self.wTree.get_widget("logoutmenu")
         self.profiletablabel = self.wTree.get_widget("profiletablabel")
         self.profiletabpage = self.wTree.get_widget("profiletabpage")
+        self.window.set_icon(self.icon)
         
     # Performs initialization of the available and installed games lists
     def init_lists(self):
@@ -216,7 +218,7 @@ class GogTuxGUI:
     # Same assumption as with the launch button. :)
     def uninstallbutton_activated(self, widget, data=None):
         yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION,
-                                  gtk.BUTTONS_YES_NO, "You're about to uninstall " + self.selected_game + ", do you wish to continue?")
+                                  gtk.BUTTONS_YES_NO, ("You're about to uninstall %s do you wish to continue?" % self.selected_game))
         resp = yesno.run()
         yesno.destroy()
         if resp == gtk.RESPONSE_YES:        
@@ -260,7 +262,7 @@ class GogTuxGUI:
         self.islogged = False
         self.loginmenu.set_sensitive(True)
         self.logoutmenu.set_sensitive(False)
-        self.window.set_title(self.window_base_title+" - Offline Mode")
+        self.window.set_title("%s - Offline Mode" % self.window_base_title)
         self.profiletabpage.hide()
         if settings_changed == True:
             self.store_settings()
@@ -524,10 +526,10 @@ class ExternalOutputWindow:
         self.game_id = game_id
         self.path = path
         if install:
-            self.window.set_title("Installing "+game_id)
+            self.window.set_title("Installing %s" % game_id)
             self.launch_install(game_id, path, installer, beta)
         else:
-            self.window.set_title("Uninstalling "+game_id)
+            self.window.set_title("Uninstalling %s" % game_id)
             self.button.set_label("Ok")
             self.button.set_sensitive(False)
             self.launch_uninstall(game_id, beta)
@@ -565,13 +567,13 @@ class ExternalOutputWindow:
         if beta:
             cmd += "--beta "
         if path != None:
-            cmd += "--install-path="+path+" "
+            cmd += ("--install-path=%s " % path)
         if installer != None:
-            cmd += " --setup="+installer
+            cmd += (" --setup=%s" % installer)
         else:
             token = self.parent.connection.auth_token.key
             secret = self.parent.connection.auth_token.secret
-            cmd += "--secret="+secret+" --token="+token
+            cmd += ("--secret=%s --token=%s" % (secret,token))
         cmd += " "+game_id+"\nexit\n"
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
@@ -582,7 +584,7 @@ class ExternalOutputWindow:
         else:
             beta_string = ""
         self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        cmd = "gog-installer "+beta_string+"-u "+game_id+"\nexit\n"
+        cmd = ("gog-installer %s -u %s\nexit\n" % (beta_string, game_id))
         thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
         thread.start()
 

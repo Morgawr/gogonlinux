@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Gog Tux
+Comment=Gog on Linux interface program
+Exec=gog-tux
+Icon=gog-tux-icon.svg
+Terminal=false
+Categories=Game

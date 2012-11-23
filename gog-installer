@@ -1,13 +1,5 @@
 #!/usr/bin/env python
 
-from gog_utils import gog_conn
-from gog_utils import gol_connection as site_conn
-from gog_utils import gog_db
-from gog_utils import version
-#from version import author as author
-#from version import email as author_email
-#from version import version as version
-
 import sys
 import getopt
 import os
@@ -15,6 +7,12 @@ import ConfigParser
 import subprocess
 import shutil
 import getpass
+import tempfile
+
+from gog_utils import gog_conn
+from gog_utils import gol_connection as site_conn
+from gog_utils import gog_db
+from gog_utils import version
 
 class Usage(Exception):
     def __init__(self, msg):
@@ -47,8 +45,8 @@ def print_usage():
           "       --available shows all the available games on gogonlinux.com")
 
 def show_version():
-    print "gog-installer application version " + version.version
-    print "developed by " + version.author + " <" + version.email + ">"
+    print "gog-installer application version %s" % version.version
+    print "developed by %s <%s>" % (version.author, version.email)
     print "see more info with the --help flag"
 
 #TODO: this one is copied from gog_gui, I should refactor them into a single module
@@ -133,7 +131,7 @@ def main(argv=None):
         database = gog_db.GogDatabase(database_path)
         database.update()
         if database.has_game(game_id):
-            raise Usage("Game is already installed in the database at "+ database.games[game_id].install_path)
+            raise Usage("Game is already installed in the database at %s " % database.games[game_id].install_path)
         if path == "":
             path = os.path.join(settings["install_path"],game_id)
         if setupfile == "":
@@ -155,8 +153,8 @@ def main(argv=None):
             print "Retrieving installer..."
             deletesetup = True
             try:
-                setup = conn.download_game(game_id,"/tmp/")
-            except:
+                setup = conn.download_game(game_id,tempfile.gettempdir())
+            except Exception as e:
                 print "Couldn't fetch installer, exiting install process"
                 return 3
         else:
@@ -165,10 +163,11 @@ def main(argv=None):
         print "Extracting data..."
         # TODO: this will probably be changed when we get more complex games into the database
         # For the love of God do not touch this yet
-        command = ("mkdir -p "+path+" && cd "+path+" && innoextract -q "+setup+" && rm -rf tmp && "
-                   "cd app && mv * .. && cd .. && rmdir app ")
+        # XXX: I'm going to change this using real python calls instead of a huge jumbled mess of command line scripting
+        command = ("mkdir -p %s && cd %s && innoextract -q %s && rm -rf tmp && "
+                   "cd app && mv * .. && cd .. && rmdir app " % (path, path, setup))
         if deletesetup:
-            command += "&& rm "+setup
+            command += "&& rm %s" % setup
         #let's extract the file
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         shell.stdin.write(command+"\n")
@@ -190,8 +189,8 @@ def main(argv=None):
         if not os.path.exists(os.path.join(general_path,"scripts")):
             os.makedirs(os.path.join(general_path,"scripts"))
         # XXX: All these "install_script"/"install_path" variable names are confusing, might go back to it and rename
-        install_script = os.path.join(general_path,"scripts","install_"+game_id)
-        uninstall_script = os.path.join(general_path,"scripts","uninstall_"+game_id)
+        install_script = os.path.join(general_path,"scripts","install_%s" % game_id)
+        uninstall_script = os.path.join(general_path,"scripts","uninstall_%s" % game_id)
         launch_script = os.path.join(path,"startgame.sh")
         database.games[game_id].install_script_file = install_script
         database.games[game_id].uninstall_script_file = uninstall_script
@@ -207,9 +206,9 @@ def main(argv=None):
         # then we need to run the install script on the target's directory
         if os.path.exists(database.games[game_id].install_script_file):
             print "Executing install script..."
-            subprocess.call([database.games[game_id].install_script_file + " " + database.games[game_id].install_path], shell=True)
+            subprocess.call("%s %s" % ([database.games[game_id].install_script_file, database.games[game_id].install_path]), shell=True)
         print "Done."
-        print database.games[game_id].full_name+" installed in "+path
+        print "%s installed in %s" % (database.games[game_id].full_name, path)
 
     except Usage, err:
         print >>sys.stderr, err.msg
@@ -233,7 +232,7 @@ def do_uninstall(args):
     path = database.games[game_id].install_path
     if database.games[game_id].uninstall_script != "404" and os.path.exists(database.games[game_id].uninstall_script_file):
         uninstall_script = os.path.join(general_path,"scripts","uninstall_"+game_id)
-        subprocess.call([database.games[game_id].uninstall_script_file + " " + database.games[game_id].install_path], shell=True)
+        subprocess.call("%s %s" % ([database.games[game_id].uninstall_script_file, database.games[game_id].install_path]), shell=True)
     print "Removing remaining files..."
     shutil.rmtree(path)
     if os.path.isfile(database.games[game_id].install_script_file):
@@ -244,7 +243,7 @@ def do_uninstall(args):
     name = database.games[game_id].full_name
     database.remove_game(game_id)
     database.store()
-    print name + " has been successfully removed."
+    print "%s has been successfully removed." % name 
 
 #TODO: eventually merge do_launch and do_uninstall under the same wrapper
 def do_launch(args):
@@ -267,9 +266,9 @@ def print_list():
     database.update()
     for k in database.games.keys():
         print " ----------- "
-        print "Game ID: " + k 
-        print "Game Title: " + database.games[k].full_name
-        print "Install Path: " + database.games[k].install_path
+        print "Game ID: %s" % k 
+        print "Game Title: %s" % database.games[k].full_name
+        print "Install Path: %s" % database.games[k].install_path
     print " ----------- "
 
 def print_avail(beta):
@@ -279,10 +278,10 @@ def print_avail(beta):
         data = site_conn.obtain_beta_available_games()
     for k in data.keys():
         print " ----------- "
-        print "Game ID: " + k
-        print "Game Title: " + data[k]["title"]
+        print "Game ID: %s" % k
+        print "Game Title: %s" % data[k]["title"]
         if beta:
-            print "Beta Status: " + ("No " if data[k]["released"] == "1" else "Yes" )
+            print "Beta Status: %s" % ("No " if data[k]["released"] == "1" else "Yes" )
 
     print " ----------- "
 

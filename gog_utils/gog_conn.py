@@ -7,6 +7,7 @@ import sys
 import urllib
 import time
 import json
+import os
 
 
 class GogConnection:
@@ -80,7 +81,9 @@ class GogConnection:
         req = urllib.urlopen(download_url)
         chunk = 512*1024 # 512KB each chunk
         size = 0
-        path = location+"setup_"+gameid+".exe"
+        print location
+        path = os.path.join(location,"setup_%s.exe" % gameid)
+        print path
         with open(path,'wb') as fp:
             while True:
                 sys.stdout.write('.')

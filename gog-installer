@@ -26,18 +26,39 @@ database_path = os.path.join(general_path,"db.json")
 deletesetup = False
 setup = ""
 path = ""
+db_entry = ""
 
 
 def handle_interruption(signal, frame):
     global setup
     global deletesetup
     global path
+    global database_path
+
+    print "Process is being terminated..."
     if deletesetup and setup != "":
+        print "Removing previously created files..."
         os.remove(setup)
     
     if path != "":
+        print "Removing target directory"
         shutil.rmtree(path)
-    os.exit(signal)  
+
+    if db_entry != "":
+        print "Checking database consistency"
+        game_id = db_entry
+        database = gog_db.GogDatabase(database_path)
+        if database.has_game(game_id):
+            install_script = database[game_id].install_script_file
+            uninstall_script = database[game_id].uninstall_script_file
+            if os.path.exists(install_script):
+                os.remove(install_script)
+            if os.path.exists(uninstall_script):
+                os.remove(uninstall_script)
+            database.remove_game(game_id)
+            database.store()
+    print "Process successfully terminated."
+    os._exit(2)
         
 
 def print_usage():
@@ -98,6 +119,7 @@ def main(argv=None):
         except getopt.error, msg:
             raise Usage(msg)
         global path
+        global db_entry
         token = ""
         secret = ""
         global setup
@@ -175,8 +197,9 @@ def main(argv=None):
             try:
                 setup = conn.download_game(game_id,tempfile.gettempdir())
             except Exception as e:
-                print "Couldn't fetch installer, exiting install process"
-                return 3
+                if "403" in str(e):
+                    print "You do not have the permissions to download this software from gog.com"
+                    return 3
         else:
             deletesetup = False
             setup = setupfile
@@ -197,9 +220,9 @@ def main(argv=None):
         shutil.rmtree(os.path.join(path,"app"))
         if deletesetup:
             os.remove(setup)
-        signals.signal(signal.SIGINT, signal.SIG_DFL)
         print "Updating local database..."
         # Now we need to update the local database and download the install/uninstall scripts
+        db_entry = game_id
         if not beta:
             data = site_conn.obtain_available_games()
         else:
@@ -230,6 +253,7 @@ def main(argv=None):
         if os.path.exists(database.games[game_id].install_script_file):
             print "Executing install script..."
             subprocess.call("%s %s" % (database.games[game_id].install_script_file, database.games[game_id].install_path), shell=True)
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
         print "Done."
         print "%s installed in %s" % (database.games[game_id].full_name, path)
 

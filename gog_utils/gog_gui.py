@@ -13,6 +13,7 @@ import urllib2
 import ConfigParser
 import subprocess
 import shutil
+import signal
 
 import gog_db
 import gol_connection as site_conn
@@ -196,10 +197,9 @@ class GogTuxGUI:
             else:
                 chooser.destroy()
                 return
-        chooser = gtk.FileChooserDialog(title="Install directory", action=gtk.FILE_CHOOSER_ACTION_CREATE_FOLDER,
+        chooser = gtk.FileChooserDialog(title="Install root directory", action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                         buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
         chooser.set_current_folder(self.settings["install_path"])
-        chooser.set_current_name(self.selected_game)
         chooser.set_default_response(gtk.RESPONSE_OK)
         resp = chooser.run()
         if resp == gtk.RESPONSE_OK:
@@ -544,66 +544,57 @@ class ExternalOutputWindow:
             except:
                 return False
         else:
+            self.buf.insert_at_cursor(source.read(4096)) # let's give the chance to flush the buffer just in case
             return False
 
-    def __threaded_execute(self, command, pipe):
+    def __threaded_execute(self, command): #, pipe):
         self.working = True
-        gobject.io_add_watch(pipe.stdout, gobject.IO_IN | gobject.IO_HUP, self.read_output)
-        pipe.stdin.write(command)
-        pipe.stdin.flush()
-        pipe.wait()
-        pipe.stdin.close()
-        if pipe.returncode == 3: # This means we failed to fetch an installer from gog.com
-            self.buf.insert_at_cursor("You do not have the permission required to install this game.")
+        self.process = subprocess.Popen(command, stdout=subprocess.PIPE)
+        gobject.io_add_watch(self.process.stdout, gobject.IO_IN | gobject.IO_HUP, self.read_output)
+        self.process.wait()
+        self.stop_working()
+
+    def stop_working(self):
         self.working = False
         self.button.set_label("Ok")
         self.button.set_sensitive(True)
         self.spinner.stop()
 
     def launch_install(self, game_id, path, installer, beta):
-        self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         # If possible, I'd love this to be more elegant but so far it works
         cmd = "gog-installer "
         if beta:
             cmd += "--beta "
         if path != None:
-            cmd += ("--install-path=%s " % path)
+            cmd += ("--install-path=%s " % os.path.join(path,game_id))
         if installer != None:
             cmd += (" --setup=%s" % installer)
         else:
             token = self.parent.connection.auth_token.key
             secret = self.parent.connection.auth_token.secret
             cmd += ("--secret=%s --token=%s" % (secret,token))
-        cmd += " "+game_id+"\nexit\n"
-        thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
-        thread.start()
+        cmd += " %s" % game_id
+        self.thread = threading.Thread(target=self.__threaded_execute, args=([cmd.split()]))
+        self.thread.start()
 
     def launch_uninstall(self, game_id, beta):
         if beta:
             beta_string = "--beta "
         else:
             beta_string = ""
-        self.process = command = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        cmd = ("gog-installer %s -u %s\nexit\n" % (beta_string, game_id))
-        thread = threading.Thread(target=self.__threaded_execute, args=(cmd, command))
+        cmd = ("gog-installer %s -u %s" % (beta_string, game_id))
+        thread = threading.Thread(target=self.__threaded_execute, args=([cmd.split()]))
         thread.start()
 
     def cleanup(self):
         self.parent.refresh_local_list()
         self.window.destroy()
 
-    def stop_install(self):
-        shutil.rmtree(self.path)  
-        #ExternalOutputWindow(self.parent, self.game_id, False)
-        self.cleanup()
-
     def do_action(self, widget, data=None):
         if self.working: # If we need to cancel the action
             if not self.install_mode: # we cannot cancel an uninstall, sadly
                 return
-            self.process.kill()
-            self.cleanup()
-            self.stop_install()
+            self.process.send_signal(signal.SIGINT)
         else: # if we are done
             self.cleanup()
 

@@ -29,7 +29,7 @@ path = ""
 db_entry = ""
 
 
-def handle_interruption(signal, frame):
+def handle_install_interrupt(signal, frame):
     global setup
     global deletesetup
     global path
@@ -103,15 +103,22 @@ def main(argv=None):
                                                          "version","list","available"])
         except getopt.error, msg:
             raise Usage(msg)
-        global path
-        global db_entry
         token = ""
         secret = ""
-        global setup
         setupfile = ""
         beta = False
         show_list = False
         show_avail = False
+        global path
+        global setup
+        global db_entry
+        
+        # 0 = install
+        # 1 = uninstall
+        # 2 = launch
+        operation = 0
+        if len(args) == 0:
+            raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
         for o, a in opts:
             if o in ("-h", "--help"):
                 print_usage()
@@ -123,11 +130,9 @@ def main(argv=None):
             elif o == "--install-path":
                 path = a
             elif o in ("-u", "--uninstall"):
-                do_uninstall(args)
-                return 
+                operation = 1
             elif o in ("-r", "--run"):
-                do_launch(args)
-                return
+                operation = 2
             elif o in ("--setup"):
                 setupfile = a
             elif o in ("--beta"):
@@ -148,17 +153,35 @@ def main(argv=None):
             return
         global general_path
         global database_path
-        global deletesetup
-        if len(args) == 0:
-            raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
         game_id = args[0]
-        settings = gog_settings.GogSettings(general_path)
         database = gog_db.GogDatabase(database_path)
         database.update()
+        if operation == 0:
+            do_install(game_id, database, setupfile, token, secret, beta)
+        elif operation == 1:
+            do_uninstall(game_id, database)
+        elif operation == 2:
+            do_launch(game_id, database)
+        else:
+            raise Exception("This shouldn't have happened, it's probably a bug. Operation failed.")
+
+    except Usage, err:
+        print >>sys.stderr, err.msg
+        print >>sys.stderr, "    for help use --help"
+        return 2
+    return 0
+
+def do_install(game_id, database, setupfile, token, secret, beta):
+        global path
+        global setup
+        global db_entry
+        global deletesetup
+        settings = gog_settings.GogSettings(general_path)
         if database.has_game(game_id):
             raise Usage("Game is already installed in the database at %s " % database.games[game_id].install_path)
         if path == "":
             path = os.path.join(settings.data["install_path"],game_id)
+        
         if setupfile == "":
             if token=="" or secret=="": # we need to ask for username and password instead
                 email = raw_input("gog.com email address: ")
@@ -176,7 +199,7 @@ def main(argv=None):
             else:
                 conn.set_auth_token(token,secret)
             print "Retrieving installer..."
-            signal.signal(signal.SIGINT, handle_interruption)
+            signal.signal(signal.SIGINT, handle_install_interrupt)
             deletesetup = True
             try:
                 setup = conn.download_game(game_id,tempfile.gettempdir())
@@ -189,7 +212,7 @@ def main(argv=None):
             setup = setupfile
 
         print "Extracting data..."
-        signal.signal(signal.SIGINT, handle_interruption)
+        signal.signal(signal.SIGINT, handle_install_interrupt)
         os.makedirs(path)
         command = "cd %s && innoextract -q %s" % (path, setup)
         #let's extract the file
@@ -199,7 +222,8 @@ def main(argv=None):
         # TODO: we should check the return value of the script to make sure it worked fine else 
         #       problems might ensue
         shell.stdin.close()
-        shutil.rmtree(os.path.join(path,"tmp"))
+        if os.path.exists(os.path.join(path,"tmp")):
+            shutil.rmtree(os.path.join(path,"tmp"))
         dir_util.copy_tree(os.path.join(path,"app"),path)
         shutil.rmtree(os.path.join(path,"app"))
         if deletesetup:
@@ -241,22 +265,7 @@ def main(argv=None):
         print "Done."
         print "%s installed in %s" % (database.games[game_id].full_name, path)
 
-    except Usage, err:
-        print >>sys.stderr, err.msg
-        print >>sys.stderr, "    for help use --help"
-        return 2
-    return 0
-
-def do_uninstall(args):
-    global general_path
-    global database_path
-    if len(args) == 0:
-        raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
-    game_id = args[0]
-    database = gog_db.GogDatabase(database_path)
-    database.update()
-    if not database.has_game(game_id):
-        raise Usage("Game is not installed in the current database")
+def do_uninstall(game_id, database):
     print "Running uninstall script..."
     path = database.games[game_id].install_path
     if database.games[game_id].uninstall_script != "404" and os.path.exists(database.games[game_id].uninstall_script_file):
@@ -274,14 +283,7 @@ def do_uninstall(args):
     database.store()
     print "%s has been successfully removed." % name 
 
-#TODO: eventually merge do_launch and do_uninstall under the same wrapper
-def do_launch(args):
-    global database_path
-    if len(args) == 0:
-        raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
-    game_id = args[0]
-    database =  gog_db.GogDatabase(database_path)
-    database.update()
+def do_launch(game_id, database):
     if not database.has_game(game_id):
         raise Usage("Game is not installed in the current database")
     game = database.games[game_id]

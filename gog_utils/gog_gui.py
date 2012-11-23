@@ -10,12 +10,12 @@ import threading
 import time
 import data_handle
 import urllib2
-import ConfigParser
 import subprocess
 import shutil
 import signal
 
 import gog_db
+import gog_settings
 import gol_connection as site_conn
 from version import version
 from version import author
@@ -73,7 +73,7 @@ class GogTuxGUI:
         self.init_lists()
         #finalize initialization
         self.acquire_settings()
-        self.have_beta_access = self.settings["access_beta"]
+        self.have_beta_access = self.settings.data["access_beta"]
         self.load_games()
         if self.check_cookies():
             token, key = self.obtain_cookies()
@@ -199,7 +199,7 @@ class GogTuxGUI:
                 return
         chooser = gtk.FileChooserDialog(title="Install root directory", action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                         buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
-        chooser.set_current_folder(self.settings["install_path"])
+        chooser.set_current_folder(self.settings.data["install_path"])
         chooser.set_default_response(gtk.RESPONSE_OK)
         resp = chooser.run()
         if resp == gtk.RESPONSE_OK:
@@ -253,26 +253,26 @@ class GogTuxGUI:
 
     def do_logout(self, widget):
         settings_changed = False
-        if "token" in self.settings.keys():
+        if "token" in self.settings.data.keys():
             settings_changed = True
-            del(self.settings["token"])
-        if "secret" in self.settings.keys():
+            del(self.settings.data["token"])
+        if "secret" in self.settings.data.keys():
             settings_changed = True
-            del(self.settings["key"])
+            del(self.settings.data["key"])
         self.islogged = False
         self.loginmenu.set_sensitive(True)
         self.logoutmenu.set_sensitive(False)
         self.window.set_title("%s - Offline Mode" % self.window_base_title)
         self.profiletabpage.hide()
         if settings_changed == True:
-            self.store_settings()
+            self.settings.store()
     
     def login_callback(self):
         if self.loginwindow.result == "Success": #we logged in successfully
             if self.loginwindow.remember:
-                self.settings["token"] = self.connection.auth_token.key
-                self.settings["key"] = self.connection.auth_token.secret
-                self.store_settings()
+                self.settings.data["token"] = self.connection.auth_token.key
+                self.settings.data["key"] = self.connection.auth_token.secret
+                self.settings.store()
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
             self.logged_successfully()
         elif self.loginwindow.result == "Destroy": #we close the login dialog without logging in
@@ -321,7 +321,7 @@ class GogTuxGUI:
         self.profilepic.set_from_pixbuf(loader.get_pixbuf().scale_simple(35,35,gtk.gdk.INTERP_BILINEAR))
         #refresh the update based on the settings, we do this because they may change dynamically
         #so we have to break the chain and re-create it every time
-        gobject.timeout_add_seconds(int(self.settings["profile_update"]),self.profile_update)
+        gobject.timeout_add_seconds(int(self.settings.data["profile_update"]),self.profile_update)
         return False
 
 
@@ -342,85 +342,33 @@ class GogTuxGUI:
 
     def acquire_settings(self):
         path = os.path.join(os.getenv("HOME"),".gog-tux")
-        if not os.path.exists(path):
-            os.makedirs(path)
-        configfile = os.path.join(path,"config")
-        if not os.path.exists(configfile):
-            self.settings = self.obtain_default_settings()
-            self.store_settings()
-        else:
-            self.settings = self.load_settings(configfile)
+        self.settings = gog_settings.GogSettings(path)
 
-    #difference between this and store_settings is that this function 
-    #obtains the settings from the GUI, applies them to the program
-    #and only then calls store_settings to update the settings
-    #on the filesystem
     def save_settings(self, widget):
-        self.settings["install_path"] = self.installpathentry.get_text()
-        self.settings["use_virtual_desktop"] = str(self.virtualdesktopcheck.get_active())
-        self.settings["virtual_resolution"] = self.virtualresentry.get_text()
-        self.settings["profile_update"] = self.profileintervalentry.get_text()
-        self.settings["access_beta"] = str(self.betasoftwarecheck.get_active())
-        self.store_settings()
+        self.settings.data["install_path"] = self.installpathentry.get_text()
+        self.settings.data["use_virtual_desktop"] = str(self.virtualdesktopcheck.get_active())
+        self.settings.data["virtual_resolution"] = self.virtualresentry.get_text()
+        self.settings.data["profile_update"] = self.profileintervalentry.get_text()
+        self.settings.data["access_beta"] = str(self.betasoftwarecheck.get_active())
+        self.settings.store()
 
     #we revert to the unmodified settings
     def undo_settings(self, widget):
-        self.installpathentry.set_text(self.settings["install_path"])
-        self.virtualdesktopcheck.set_active(self.settings["use_virtual_desktop"] == "True")
-        self.virtualresentry.set_text(self.settings["virtual_resolution"])
-        self.profileintervalentry.set_text(str(self.settings["profile_update"]))
-        self.betasoftwarecheck.set_active(self.settings["access_beta"] == "True")
+        self.installpathentry.set_text(self.settings.data["install_path"])
+        self.virtualdesktopcheck.set_active(self.settings.data["use_virtual_desktop"] == "True")
+        self.virtualresentry.set_text(self.settings.data["virtual_resolution"])
+        self.profileintervalentry.set_text(str(self.settings.data["profile_update"]))
+        self.betasoftwarecheck.set_active(self.settings.data["access_beta"] == "True")
 
-    def store_settings(self):
-        path = os.path.join(os.getenv("HOME"),".gog-tux")
-        if not os.path.exists(path):
-            os.makedirs(path)
-        configfile = os.path.join(path,"config")
-        parser = ConfigParser.ConfigParser()
-        section = "settings"
-        parser.add_section(section)
-        parser.set(section,"install_path", self.settings["install_path"])
-        parser.set(section,"use_virtual_desktop", self.settings["use_virtual_desktop"])
-        parser.set(section,"virtual_resolution", self.settings["virtual_resolution"])
-        parser.set(section,"profile_update", self.settings["profile_update"])
-        parser.set(section,"access_beta", self.settings["access_beta"])
-        if "token" in self.settings and "key" in self.settings:
-            parser.set(section,"token", self.settings["token"])
-            parser.set(section,"key", self.settings["key"])
-        f = open(configfile,'w+')
-        parser.write(f)
-        f.close()
 
     def check_cookies(self):
-        if "token" in self.settings and "key" in self.settings:
+        if "token" in self.settings.data and "key" in self.settings.data:
             return True
         else:
             return False
 
     def obtain_cookies(self):
-        return (self.settings["token"], self.settings["key"])
-
-    def obtain_default_settings(self):
-        sets = {}
-        sets["install_path"] = os.path.join(os.getenv("HOME"),"games","gog")
-        sets["use_virtual_desktop"] = False
-        sets["profile_update"] = 120
-        sets["virtual_resolution"] = "800x600"
-        sets["access_beta"] = False
-        return sets
-
-    def load_settings(self, conf):
-        parser = ConfigParser.ConfigParser()
-        parser.read(conf)
-        sets = {}
-        section = "settings"
-        for opt in parser.options(section):
-            try:
-                sets[opt] = parser.get(section, opt)
-            except:
-                print "Exception in config parsing on %s " % option
-                sets[opt] = None
-        return sets
+        return (self.settings.data["token"], self.settings.data["key"])
 
     def do_load_games(self):
         if self.have_beta_access == "True":

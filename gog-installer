@@ -15,13 +15,13 @@ from gog_utils import gog_conn
 from gog_utils import gol_connection as site_conn
 from gog_utils import gog_db
 from gog_utils import version
+from gog_utils import gog_settings
 
 class Usage(Exception):
     def __init__(self, msg):
         self.msg = msg
 
 general_path = os.path.join(os.getenv("HOME"),".gog-tux")
-config_path = os.path.join(general_path,"config")
 database_path = os.path.join(general_path,"db.json")
 deletesetup = False
 setup = ""
@@ -87,26 +87,11 @@ def show_version():
     print "developed by %s <%s>" % (version.author, version.email)
     print "see more info with the --help flag"
 
-#TODO: this one is copied from gog_gui, I should refactor them into a single module
-def load_settings(conf):
-    parser = ConfigParser.ConfigParser()
-    parser.read(conf)
-    sets = {}
-    section = "settings"
-    for opt in parser.options(section):
-        try:
-            sets[opt] = parser.get(section, opt)
-        except:
-            print "Exception in config parsing on %s " % option
-            sets[opt] = None
-    return sets
-
 def main(argv=None):
     #first we set up unbuffered output in case we need to print to GUI (gog-tux)
     unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
     sys.stdout.close()
     sys.stdout = unbuffered
-
     if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
         os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
     if argv is None:
@@ -162,19 +147,18 @@ def main(argv=None):
             print_avail(beta)
             return
         global general_path
-        global config_path
         global database_path
         global deletesetup
         if len(args) == 0:
             raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
         game_id = args[0]
-        settings = load_settings(config_path)
+        settings = gog_settings.GogSettings(general_path)
         database = gog_db.GogDatabase(database_path)
         database.update()
         if database.has_game(game_id):
             raise Usage("Game is already installed in the database at %s " % database.games[game_id].install_path)
         if path == "":
-            path = os.path.join(settings["install_path"],game_id)
+            path = os.path.join(settings.data["install_path"],game_id)
         if setupfile == "":
             if token=="" or secret=="": # we need to ask for username and password instead
                 email = raw_input("gog.com email address: ")
@@ -265,12 +249,10 @@ def main(argv=None):
 
 def do_uninstall(args):
     global general_path
-    global config_path
     global database_path
     if len(args) == 0:
         raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
     game_id = args[0]
-    settings = load_settings(config_path)
     database = gog_db.GogDatabase(database_path)
     database.update()
     if not database.has_game(game_id):
@@ -294,12 +276,10 @@ def do_uninstall(args):
 
 #TODO: eventually merge do_launch and do_uninstall under the same wrapper
 def do_launch(args):
-    global config_path
     global database_path
     if len(args) == 0:
         raise Usage("Wrong number of arguments, you need at least the id of the game you wish to install/uninstall")
     game_id = args[0]
-    settings = load_settings(config_path)
     database =  gog_db.GogDatabase(database_path)
     database.update()
     if not database.has_game(game_id):

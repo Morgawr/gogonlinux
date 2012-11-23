@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 from distutils.core import setup
-from gog_utils import version as ver
+execfile('gog_utils/version.py')
 
 setup(name='gogonlinux',
-      version=ver.version,
+      version=version,
       description='Client for GOG games on Linux',
-      author=ver.author,
-      author_email=ver.email,
+      author=author,
+      author_email=email,
       license='3-clause BSD',
       url='www.gogonlinux.com',
       packages=['gog_utils'],

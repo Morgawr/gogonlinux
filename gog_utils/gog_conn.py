@@ -41,13 +41,13 @@ class GogConnection:
         token = oauth.Token(temp_token, temp_secret)
         auth_client = oauth.Client(self.consumer,token)
         print "Authenticating..."
-        login_url = self.url_base+self.auth_temp_token+"/?"+urllib.urlencode({ 'password' : password, 'username' : username })
+        login_url = "%s%s/?%s" % (self.url_base, self.auth_temp_token, urllib.urlencode({ 'password' : password, 'username' : username }))
         resp, content = auth_client.request(login_url, "GET")
         self.__check_status(resp)
         oauth_verifier = dict(urlparse.parse_qsl(content))['oauth_verifier']
         token.set_verifier(oauth_verifier)
         client = oauth.Client(self.consumer,token)
-        token_url = self.url_base+self.get_token+"/?"+urllib.urlencode({ 'oauth_verifier' : oauth_verifier })
+        token_url = "%s%s/?%s" % (self.url_base, self.get_token, urllib.urlencode({ 'oauth_verifier' : oauth_verifier }))
         resp, content = client.request(token_url)
         self.__check_status(resp)
         final_token = dict(urlparse.parse_qsl(content))['oauth_token']
@@ -72,7 +72,7 @@ class GogConnection:
 
     def download_game(self, gameid, location):
         # this should work most of the time but I am not 100% sure 
-        downloader = self.url_base+"downloader2/installer/"+gameid+"/0/" 
+        downloader = "%sdownloader2/installer/%s/0/" % (self.url_base, gameid)
         client = oauth.Client(self.consumer,self.auth_token)
         resp, content = client.request(downloader)
         self.__check_status(resp)
@@ -93,7 +93,7 @@ class GogConnection:
                     break
                 size += chunk
                 fp.write(data)
-            print str(size/1024) + "KB written"
+            print "%d KB written" % (size/1024)
         return path
 
 

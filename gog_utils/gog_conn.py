@@ -81,9 +81,7 @@ class GogConnection:
         req = urllib.urlopen(download_url)
         chunk = 512*1024 # 512KB each chunk
         size = 0
-        print location
         path = os.path.join(location,"setup_%s.exe" % gameid)
-        print path
         with open(path,'wb') as fp:
             while True:
                 sys.stdout.write('.')

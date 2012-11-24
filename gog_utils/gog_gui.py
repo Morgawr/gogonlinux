@@ -24,6 +24,7 @@ from version import email
 package_directory = os.path.dirname(os.path.abspath(__file__))
 dbpath = os.path.join(os.getenv("HOME"), ".gog-tux", "db.json")
 gobject.threads_init()
+icon = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","gog-tux-icon.svg"))
 
 class GogTuxGUI:
     
@@ -33,7 +34,6 @@ class GogTuxGUI:
     compat["yellow"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","yellow_compat.png"))
     compat["red"] = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","red_compat.png"))
     beta = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","beta.png"))
-    icon = gtk.gdk.pixbuf_new_from_file(os.path.join(package_directory,"imgdata","gog-tux-icon.svg"))
 
     #some other default stuff
     islogged = False
@@ -108,7 +108,7 @@ class GogTuxGUI:
         self.logoutmenu = self.wTree.get_widget("logoutmenu")
         self.profiletablabel = self.wTree.get_widget("profiletablabel")
         self.profiletabpage = self.wTree.get_widget("profiletabpage")
-        self.window.set_icon(self.icon)
+        self.window.set_icon(icon)
         
     # Performs initialization of the available and installed games lists
     def init_lists(self):
@@ -458,6 +458,7 @@ class ExternalOutputWindow:
     def __init__(self, parent, game_id, install=True, path=None, installer=None, beta=False):
         self.glade = gtk.glade.XML(os.path.join(package_directory, "externalwindow.glade"))
         self.window = self.glade.get_widget("externalwindow")
+        self.window.set_icon(icon)
         self.textview = self.glade.get_widget("outputview")
         self.textview.modify_base(gtk.STATE_NORMAL, gtk.gdk.color_parse('black'))
         self.textview.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('green'))

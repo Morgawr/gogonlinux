@@ -1,5 +1,7 @@
 """
-Class representing the database where all the game info is stored.
+Module representing the database where all the game info is stored.
+
+This module also represents the game records that are stored in the database.
 
 """
 

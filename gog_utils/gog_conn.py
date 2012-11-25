@@ -46,23 +46,29 @@ class GogConnection:
         temp_secret = request_token['oauth_token_secret']
         temp_token = request_token['oauth_token']
         token = oauth.Token(temp_token, temp_secret)
-        auth_client = oauth.Client(self.consumer,token)
+        auth_client = oauth.Client(self.consumer, token)
         print "Authenticating..."
-        login_url = "%s%s/?%s" % (self.url_base, self.auth_temp_token, urllib.urlencode({ 'password' : password, 'username' : username }))
+        enc_url = urllib.urlencode({ 'password' : password, 
+                                     'username' : username })
+        login_url = "%s%s/?%s" % (self.url_base, self.auth_temp_token, enc_url)
         resp, content = auth_client.request(login_url, "GET")
-        self.__check_status(resp,"Unable to authenticate.\nCheck your connection, your username and your password")
+        error_message = "%s\n%s" % ("Unable to authenticate.\n", 
+                                    "Check your connection," +
+                                    "your username and your password")
+        self.__check_status(resp, error_message)
         oauth_verifier = dict(urlparse.parse_qsl(content))['oauth_verifier']
         token.set_verifier(oauth_verifier)
-        client = oauth.Client(self.consumer,token)
-        token_url = "%s%s/?%s" % (self.url_base, self.get_token, urllib.urlencode({ 'oauth_verifier' : oauth_verifier }))
+        client = oauth.Client(self.consumer, token)
+        enc_url = urllib.urlencode({ 'oauth_verifier' : oauth_verifier })
+        token_url = "%s%s/?%s" % (self.url_base, self.get_token, enc_url)
         resp, content = client.request(token_url)
-        self.__check_status(resp,"Couldn't authenticate connection.\nPlease verify your internet connection is working properly.")
+        self.__check_status(resp, error_message)
         final_token = dict(urlparse.parse_qsl(content))['oauth_token']
         final_secret = dict(urlparse.parse_qsl(content))['oauth_token_secret']
         self.set_auth_token(final_token, final_secret)
 
         self.auth_token = oauth.Token(final_token, final_secret)
-        client = oauth.Client(self.consumer,self.auth_token)
+        client = oauth.Client(self.consumer, self.auth_token)
         print "Success"
 
     def set_auth_token(self, token, secret):
@@ -74,8 +80,9 @@ class GogConnection:
         if not ('auth_token' in dir(self)):
             raise Exception("Not logged in correctly.")
         
-        client = oauth.Client(self.consumer,self.auth_token)
-        resp, content = client.request("https://api.gog.com/en/downloader2/user/")
+        client = oauth.Client(self.consumer, self.auth_token)
+        user_url = "https://api.gog.com/en/downloader2/user/"
+        resp, content = client.request(user_url)
         self.__check_status(resp)
         return content
 
@@ -83,7 +90,7 @@ class GogConnection:
         """Downloads the game with gameid from Gog to location."""
         # this should work most of the time but I am not 100% sure 
         downloader = "%sdownloader2/installer/%s/0/" % (self.url_base, gameid)
-        client = oauth.Client(self.consumer,self.auth_token)
+        client = oauth.Client(self.consumer, self.auth_token)
         resp, content = client.request(downloader)
         self.__check_status(resp)
         download_url = json.loads(content)["file"]["link"]
@@ -91,8 +98,8 @@ class GogConnection:
         req = urllib.urlopen(download_url)
         chunk = 512*1024 # 512KB each chunk
         size = 0
-        path = os.path.join(location,"setup_%s.exe" % gameid)
-        with open(path,'wb') as fp:
+        path = os.path.join(location, "setup_%s.exe" % gameid)
+        with open(path, 'wb') as file_handle:
             while True:
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -100,7 +107,7 @@ class GogConnection:
                 if not data:
                     break
                 size += chunk
-                fp.write(data)
+                file_handle.write(data)
             print "%d KB written" % (size/1024)
         return path
 

@@ -1,5 +1,4 @@
 
-import sys
 import os
 import pygtk
 pygtk.require("2.0")
@@ -7,11 +6,9 @@ import gtk
 import gobject
 import gtk.glade
 import threading
-import time
 import data_handle
 import urllib2
 import subprocess
-import shutil
 import signal
 
 import gog_db

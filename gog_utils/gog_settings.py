@@ -32,7 +32,7 @@ class GogSettings:
             try:
                 self.data[opt] = parser.get(section, opt)
             except:
-                print "Exception in config parsing on %s " % option
+                print "Exception in config parsing on %s " % opt
                 self.data[opt] = None
 
     def store(self):

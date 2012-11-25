@@ -1,3 +1,8 @@
+"""
+Class representing the database where all the game info is stored.
+
+"""
+
 import json
 import os
 import getpass
@@ -31,7 +36,8 @@ class GogDatabase:
         # Locking for race condition purposes
         with FileLock.FileLock(os.path.basename(self.dbpath), filelock_path):
             f = open(self.dbpath, 'w')
-            f.write(json.dumps(self.games, indent=4, default=GameRecord.serialize))
+            f.write(json.dumps(self.games, indent=4, 
+                               default=GameRecord.serialize))
             f.close()
 
     def remove_game(self, name):

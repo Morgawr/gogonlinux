@@ -3,7 +3,7 @@ import os
 import getpass
 import gog_filelock as FileLock
 
-filelock_path = os.path.join("/var","lock",getpass.getuser())
+filelock_path = os.path.join("/var", "lock", getpass.getuser())
 
 class GogDatabase:
 
@@ -24,13 +24,13 @@ class GogDatabase:
         f.close()
         self.games = {}
         for name, content in data.items():
-            self.games[name] = GameRecord(name,content)
+            self.games[name] = GameRecord(name, content)
 
     #stores changes to the local database file, on the filesystem
     def store(self):
         # Locking for race condition purposes
-        with FileLock.FileLock(os.path.basename(self.dbpath),filelock_path):
-            f = open(self.dbpath,'w')
+        with FileLock.FileLock(os.path.basename(self.dbpath), filelock_path):
+            f = open(self.dbpath, 'w')
             f.write(json.dumps(self.games, indent=4, default=GameRecord.serialize))
             f.close()
 

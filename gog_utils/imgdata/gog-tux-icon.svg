@@ -12,55 +12,189 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="64px"
    height="64px"
-   id="svg3011"
+   id="svg4070"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
-   sodipodi:docname="New document 2">
+   sodipodi:docname="gog-tux-icon.svg">
   <defs
-     id="defs3013">
+     id="defs4072">
     <linearGradient
        inkscape:collect="always"
-       id="linearGradient3901">
+       id="linearGradient4896">
       <stop
-         style="stop-color:#c1d912;stop-opacity:1;"
+         style="stop-color:#000000;stop-opacity:1;"
          offset="0"
-         id="stop3903" />
+         id="stop4898" />
       <stop
-         style="stop-color:#c1d912;stop-opacity:0.21834061"
+         style="stop-color:#000000;stop-opacity:0;"
          offset="1"
-         id="stop3905" />
+         id="stop4900" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
-       id="linearGradient3885">
+       id="linearGradient4888">
       <stop
-         style="stop-color:#c1d912;stop-opacity:1;"
+         style="stop-color:#c4de12;stop-opacity:1;"
          offset="0"
-         id="stop3887" />
+         id="stop4890" />
       <stop
-         style="stop-color:#c1d912;stop-opacity:0;"
+         style="stop-color:#c4de12;stop-opacity:0;"
          offset="1"
-         id="stop3889" />
+         id="stop4892" />
     </linearGradient>
-    <linearGradient
+    <radialGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient3885"
-       id="linearGradient3891"
-       x1="29.09091"
-       y1="59.272728"
-       x2="32"
-       y2="-30.90909"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0.72727345,-0.72727309)" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3901"
-       id="linearGradient3907"
-       x1="30.363636"
-       y1="3.6363637"
-       x2="26.363636"
-       y2="72"
+       xlink:href="#linearGradient4888"
+       id="radialGradient4894"
+       cx="31.870041"
+       cy="16.234667"
+       fx="31.870041"
+       fy="16.234667"
+       r="32.141216"
+       gradientTransform="matrix(-1.8703279,1.6861886,-1.5594434,-1.7298901,114.97652,-3.3740119)"
        gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4902"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4904"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4906"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="34.341549"
+       cy="59.881691"
+       fx="34.341549"
+       fy="59.881691"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4908"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4910"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4912"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4937"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4939"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="42.886124"
+       cy="163.53488"
+       fx="42.886124"
+       fy="163.53488"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4941"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4943"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4945"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4947"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="28.545443"
+       cy="54.603374"
+       fx="28.545443"
+       fy="54.603374"
+       r="25.76147" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4896"
+       id="radialGradient4953"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68154335,-3.0999197,0.99819159,0.22099921,-45.414144,131.61587)"
+       cx="42.886124"
+       cy="163.53488"
+       fx="42.886124"
+       fy="163.53488"
+       r="25.76147" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -69,9 +203,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.5"
-     inkscape:cx="29.232211"
-     inkscape:cy="24.400407"
+     inkscape:zoom="11.313709"
+     inkscape:cx="37.790542"
+     inkscape:cy="32.907999"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -80,9 +214,11 @@
      inkscape:window-height="880"
      inkscape:window-x="1"
      inkscape:window-y="2"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true" />
   <metadata
-     id="metadata3016">
+     id="metadata4075">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -98,65 +234,96 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer">
     <rect
-       style="fill:#000000"
-       id="rect3039"
-       width="64"
-       height="64"
-       x="0.14121816"
-       y="0.051629812" />
+       style="fill:#000000;fill-opacity:1"
+       id="rect4082-4"
+       width="64.282433"
+       height="64.15387"
+       x="-0.14121635"
+       y="-0.076934896" />
+    <rect
+       style="fill:url(#radialGradient4894);fill-opacity:1"
+       id="rect4082"
+       width="64.282433"
+       height="64.15387"
+       x="-0.12856486"
+       y="-0.15386981" />
+    <rect
+       style="fill:#000000;fill-opacity:1"
+       id="rect4592"
+       width="54.000103"
+       height="53.995293"
+       x="4.9975123"
+       y="5.0023799" />
     <text
        xml:space="preserve"
-       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#c1d912;fill-opacity:0;stroke:none;font-family:GOG Font;-inkscape-font-specification:GOG Font;font-stretch:normal;font-variant:normal"
-       x="4.2426405"
-       y="10.388449"
-       id="text3041"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#c1d912;fill-opacity:1;stroke:none;font-family:Sans"
+       x="9.8994951"
+       y="10.613438"
+       id="text4629"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
-         id="tspan3043"></tspan></text>
+         id="tspan4631"></tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#c1d912;fill-opacity:0;stroke:none;font-family:Sans"
-       x="3.856946"
-       y="4.4744654"
-       id="text3813"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="11.667262"
+       y="-1.7609305"
+       id="text4633"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
-         id="tspan3815"
-         x="3.856946"
-         y="4.4744654" /></text>
-    <text
-       xml:space="preserve"
-       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3907);fill-opacity:1;stroke:none;font-family:Sans"
-       x="2.5712974"
-       y="20.287945"
-       id="text3817"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3819"
-         x="2.5712974"
-         y="20.287945"
-         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:GOG Font;-inkscape-font-specification:GOG Font;fill-opacity:1;fill:url(#linearGradient3907)">gog</tspan><tspan
-         sodipodi:role="line"
-         x="2.5712974"
-         y="60.287945"
-         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:GOG Font;-inkscape-font-specification:GOG Font;fill-opacity:1;fill:url(#linearGradient3907)"
-         id="tspan3821">tux</tspan></text>
-    <text
-       sodipodi:linespacing="125%"
-       id="text3871"
-       y="19.560671"
-       x="3.2985702"
-       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient3891);fill-opacity:1;stroke:none;font-family:Sans"
-       xml:space="preserve"><tspan
-         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:url(#linearGradient3891);fill-opacity:1;font-family:GOG Font;-inkscape-font-specification:GOG Font"
-         y="19.560671"
-         x="3.2985702"
-         id="tspan3873"
-         sodipodi:role="line">gog</tspan><tspan
-         id="tspan3875"
-         style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:url(#linearGradient3891);fill-opacity:1;font-family:GOG Font;-inkscape-font-specification:GOG Font"
-         y="59.560673"
-         x="3.2985702"
-         sodipodi:role="line">tux</tspan></text>
+         id="tspan4635"
+         x="11.667262"
+         y="-1.7609305" /></text>
+    <g
+       id="g4755"
+       transform="matrix(0.91371081,0,0,0.87890145,2.3868377,2.9203501)"
+       style="fill-opacity:1;stroke:url(#radialGradient4947)">
+      <text
+         sodipodi:linespacing="125%"
+         id="text4637-5"
+         y="20.249815"
+         x="5.437326"
+         style="font-size:30px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#7f900c;fill-opacity:1;stroke:url(#radialGradient4937);font-family:GOG Font;-inkscape-font-specification:GOG Font"
+         xml:space="preserve"><tspan
+           y="20.249815"
+           x="5.437326"
+           id="tspan4639-6"
+           sodipodi:role="line"
+           style="fill-opacity:1;stroke:url(#radialGradient4937)">gog</tspan><tspan
+           id="tspan4641-4"
+           y="57.749817"
+           x="5.437326"
+           sodipodi:role="line"
+           style="fill-opacity:1;stroke:url(#radialGradient4937)">tux</tspan></text>
+      <g
+         id="g4734"
+         style="fill-opacity:1;stroke:url(#radialGradient4945)">
+        <g
+           id="g4729"
+           style="fill-opacity:1;stroke:url(#radialGradient4943)">
+          <g
+             id="g4740"
+             style="fill-opacity:1;stroke:url(#radialGradient4941)">
+            <text
+               xml:space="preserve"
+               style="font-size:30px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#c1d912;fill-opacity:1;stroke:url(#radialGradient4953);font-family:GOG Font;-inkscape-font-specification:GOG Font"
+               x="5.0381355"
+               y="20.601322"
+               id="text4637"
+               sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4639"
+                 x="5.0381355"
+                 y="20.601322"
+                 style="fill-opacity:1;stroke:url(#radialGradient4953)">gog</tspan><tspan
+                 sodipodi:role="line"
+                 x="5.0381355"
+                 y="58.101322"
+                 id="tspan4641"
+                 style="fill-opacity:1;stroke:url(#radialGradient4953)">tux</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
   </g>
 </svg>

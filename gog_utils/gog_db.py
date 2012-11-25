@@ -8,7 +8,7 @@ This module also represents the game records that are stored in the database.
 import json
 import os
 import getpass
-import gog_utils.gog_filelock as FileLock
+import gog_filelock as FileLock
 
 FILELOCK_PATH = os.path.join("/var", "lock", getpass.getuser())
 

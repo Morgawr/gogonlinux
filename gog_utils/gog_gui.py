@@ -40,7 +40,7 @@ class GogTuxGUI:
     game_data = {} # list of all available games from the website
     selected_game = None
 
-    window_base_title = "(unofficial) Gog Linux Client"
+    window_base_title = "Gog Linux Client"
 
 
     def __init__(self, connection):
@@ -150,11 +150,12 @@ class GogTuxGUI:
     # This simply creates the about popup window and appends relevant data
     def about_menu_activated(self, widget, data=None):
         about = gtk.AboutDialog()
-        about.set_program_name("Gog Linux Client")
+        about.set_program_name("Gog Tux Client")
         about.set_version(version)
         about.set_copyright(author+" - "+email)
         about.set_comments("Unofficial Linux client for the gog.com platform")
         about.set_website("http://www.gogonlinux.com")
+        about.set_logo(icon)
         about.run()
         about.destroy()
 

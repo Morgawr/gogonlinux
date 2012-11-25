@@ -172,98 +172,98 @@ def main(argv=None):
     return 0
 
 def do_install(game_id, database, setupfile, token, secret, beta):
-        global path
-        global setup
-        global db_entry
-        global deletesetup
-        settings = gog_settings.GogSettings(general_path)
-        if database.has_game(game_id):
-            raise Usage("Game is already installed in the database at %s " % database.games[game_id].install_path)
-        if path == "":
-            path = os.path.join(settings.data["install_path"],game_id)
-        
-        if setupfile == "":
-            if token=="" or secret=="": # we need to ask for username and password instead
-                email = raw_input("gog.com email address: ")
-                password = getpass.getpass()
-                is_user = True
-            else:
-                is_user = False
-            conn = gog_conn.GogConnection()
-            if is_user:
-                try:
-                    conn.connect(email,password)
-                except:
-                    raise Usage("Login failed. Be sure you are connected to the internet and that your email and password"
-                                " are correct and working")
-            else:
-                conn.set_auth_token(token,secret)
-            print "Retrieving installer..."
-            signal.signal(signal.SIGINT, handle_install_interrupt)
-            deletesetup = True
+    global path
+    global setup
+    global db_entry
+    global deletesetup
+    settings = gog_settings.GogSettings(general_path)
+    if database.has_game(game_id):
+        raise Usage("Game is already installed in the database at %s " % database.games[game_id].install_path)
+    if path == "":
+        path = os.path.join(settings.data["install_path"],game_id)
+    
+    if setupfile == "":
+        if token=="" or secret=="": # we need to ask for username and password instead
+            email = raw_input("gog.com email address: ")
+            password = getpass.getpass()
+            is_user = True
+        else:
+            is_user = False
+        conn = gog_conn.GogConnection()
+        if is_user:
             try:
-                setup = conn.download_game(game_id,tempfile.gettempdir())
-            except Exception as e:
-                if "403" in str(e):
-                    print "You do not have the permissions to download this software from gog.com"
-                    return 3
+                conn.connect(email,password)
+            except:
+                raise Usage("Login failed. Be sure you are connected to the internet and that your email and password"
+                            " are correct and working")
         else:
-            deletesetup = False
-            setup = setupfile
-
-        print "Extracting data..."
+            conn.set_auth_token(token,secret)
+        print "Retrieving installer..."
         signal.signal(signal.SIGINT, handle_install_interrupt)
-        os.makedirs(path)
-        command = "cd %s && innoextract -q %s" % (path, setup)
-        #let's extract the file
-        shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        shell.stdin.write(command+"\n")
-        shell.communicate()
-        # TODO: we should check the return value of the script to make sure it worked fine else 
-        #       problems might ensue
-        shell.stdin.close()
-        if os.path.exists(os.path.join(path,"tmp")):
-            shutil.rmtree(os.path.join(path,"tmp"))
-        dir_util.copy_tree(os.path.join(path,"app"),path)
-        shutil.rmtree(os.path.join(path,"app"))
-        if deletesetup:
-            os.remove(setup)
-        print "Updating local database..."
-        # Now we need to update the local database and download the install/uninstall scripts
-        db_entry = game_id
-        if not beta:
-            data = site_conn.obtain_available_games()
-        else:
-            data = site_conn.obtain_beta_available_games()
-        game_data = data[game_id]
-        game = gog_db.GameRecord(game_data["title"],game_data)
-        database.add_game(game_id,game)
-        # let's download the install/uninstall scripts
-        print "Retrieving game scripts from remote server..."
-        if not os.path.exists(os.path.join(general_path,"scripts")):
-            os.makedirs(os.path.join(general_path,"scripts"))
-        # XXX: All these "install_script"/"install_path" variable names are confusing, might go back to it and rename
-        install_script = os.path.join(general_path,"scripts","install_%s" % game_id)
-        uninstall_script = os.path.join(general_path,"scripts","uninstall_%s" % game_id)
-        launch_script = os.path.join(path,"startgame.sh")
-        database.games[game_id].install_script_file = install_script
-        database.games[game_id].uninstall_script_file = uninstall_script
-        database.games[game_id].install_path = path
-        database.games[game_id].online_id = game_id
-        if database.games[game_id].install_script != "404":
-            site_conn.download_script(install_script, database.games[game_id].install_script)
-        if database.games[game_id].uninstall_script != "404":
-            site_conn.download_script(uninstall_script, database.games[game_id].uninstall_script)
-        if database.games[game_id].launch_script != "404":
-            site_conn.download_script(launch_script, database.games[game_id].launch_script)
-        database.store()
-        # then we need to run the install script on the target's directory
-        if os.path.exists(database.games[game_id].install_script_file):
-            print "Executing install script..."
-            subprocess.call("%s %s" % (database.games[game_id].install_script_file, database.games[game_id].install_path), shell=True)
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        print "Done."
-        print "%s installed in %s" % (database.games[game_id].full_name, path)
+        deletesetup = True
+        try:
+            setup = conn.download_game(game_id,tempfile.gettempdir())
+        except Exception as e:
+            if "403" in str(e):
+                print "You do not have the permissions to download this software from gog.com"
+                return 3
+    else:
+        deletesetup = False
+        setup = setupfile
+
+    print "Extracting data..."
+    signal.signal(signal.SIGINT, handle_install_interrupt)
+    os.makedirs(path)
+    command = "cd %s && innoextract -q %s" % (path, setup)
+    #let's extract the file
+    shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    shell.stdin.write(command+"\n")
+    shell.communicate()
+    # TODO: we should check the return value of the script to make sure it worked fine else 
+    #       problems might ensue
+    shell.stdin.close()
+    if os.path.exists(os.path.join(path,"tmp")):
+        shutil.rmtree(os.path.join(path,"tmp"))
+    dir_util.copy_tree(os.path.join(path,"app"),path)
+    shutil.rmtree(os.path.join(path,"app"))
+    if deletesetup:
+        os.remove(setup)
+    print "Updating local database..."
+    # Now we need to update the local database and download the install/uninstall scripts
+    db_entry = game_id
+    if not beta:
+        data = site_conn.obtain_available_games()
+    else:
+        data = site_conn.obtain_beta_available_games()
+    game_data = data[game_id]
+    game = gog_db.GameRecord(game_data["title"],game_data)
+    database.add_game(game_id,game)
+    # let's download the install/uninstall scripts
+    print "Retrieving game scripts from remote server..."
+    if not os.path.exists(os.path.join(general_path,"scripts")):
+        os.makedirs(os.path.join(general_path,"scripts"))
+    # XXX: All these "install_script"/"install_path" variable names are confusing, might go back to it and rename
+    install_script = os.path.join(general_path,"scripts","install_%s" % game_id)
+    uninstall_script = os.path.join(general_path,"scripts","uninstall_%s" % game_id)
+    launch_script = os.path.join(path,"startgame.sh")
+    database.games[game_id].install_script_file = install_script
+    database.games[game_id].uninstall_script_file = uninstall_script
+    database.games[game_id].install_path = path
+    database.games[game_id].online_id = game_id
+    if database.games[game_id].install_script != "404":
+        site_conn.download_script(install_script, database.games[game_id].install_script)
+    if database.games[game_id].uninstall_script != "404":
+        site_conn.download_script(uninstall_script, database.games[game_id].uninstall_script)
+    if database.games[game_id].launch_script != "404":
+        site_conn.download_script(launch_script, database.games[game_id].launch_script)
+    database.store()
+    # then we need to run the install script on the target's directory
+    if os.path.exists(database.games[game_id].install_script_file):
+        print "Executing install script..."
+        subprocess.call("%s %s" % (database.games[game_id].install_script_file, database.games[game_id].install_path), shell=True)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    print "Done."
+    print "%s installed in %s" % (database.games[game_id].full_name, path)
 
 def do_uninstall(game_id, database):
     print "Running uninstall script..."

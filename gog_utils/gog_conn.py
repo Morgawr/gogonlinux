@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import oauth2 as oauth
 import urlparse

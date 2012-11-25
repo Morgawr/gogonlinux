@@ -13,8 +13,9 @@ import gog_utils.gog_filelock as FileLock
 FILELOCK_PATH = os.path.join("/var", "lock", getpass.getuser())
 
 class GogDatabase:
+    """Class representing the game database."""
 
-    #this is a dictionary of all game data
+    # This is a dictionary of all game data
     games = {}
 
     def __init__(self, dbfile):
@@ -24,8 +25,11 @@ class GogDatabase:
             file_handle.write("{ }")
             file_handle.close()
 
-    #reloads the database from the json file discarding any unstored changes
     def update(self):
+        """
+        Reloads the database from the json file discarding any unstored changes.
+
+        """
         file_handle = open(self.dbpath)
         data = json.load(file_handle)
         file_handle.close()
@@ -33,8 +37,8 @@ class GogDatabase:
         for name, content in data.items():
             self.games[name] = GameRecord(name, content)
 
-    #stores changes to the local database file, on the filesystem
     def store(self):
+        """Stores changes to the local database file, on the filesystem."""
         # Locking for race condition purposes
         with FileLock.FileLock(os.path.basename(self.dbpath), FILELOCK_PATH):
             file_handle = open(self.dbpath, 'w')
@@ -43,21 +47,24 @@ class GogDatabase:
             file_handle.close()
 
     def remove_game(self, name):
+        """Remove a game from the database."""        
         if self.has_game(name):
             del self.games[name]
 
     def add_game(self, name, game):
+        """Add a game to the database."""
         if not self.has_game(name):
             self.games[name] = game
 
     def has_game(self, name):
+        """Check whether a game is in the database."""
         if name in self.games.keys():
             return True
         return False
 
 
 class GameRecord(json.JSONEncoder):
-
+    """Class representing a game record in the database."""
     install_path = None
     install_script = None
     uninstall_script = None
@@ -95,6 +102,7 @@ class GameRecord(json.JSONEncoder):
     
     @staticmethod
     def serialize(obj):
+        """Serializes a GameRecord object."""
         data = {}
         data["install_path"] = obj.install_path
         data["install_script"] = obj.install_script

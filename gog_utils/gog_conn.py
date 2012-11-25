@@ -26,9 +26,11 @@ class GogConnection:
         self.consumer = oauth.Consumer(client_key, client_secret)
 
     #returns true only if resp status is 200 else it raises an exception
-    def __check_status(self, resp):
+    def __check_status(self, resp, failure=None):
         if resp['status'] == '200':
             return True
+        if failure is not None:
+            raise Exception(failure)
         raise Exception("Invalid request, response %s." % resp['status'])
 
     def connect(self, username, password):
@@ -43,13 +45,13 @@ class GogConnection:
         print "Authenticating..."
         login_url = "%s%s/?%s" % (self.url_base, self.auth_temp_token, urllib.urlencode({ 'password' : password, 'username' : username }))
         resp, content = auth_client.request(login_url, "GET")
-        self.__check_status(resp)
+        self.__check_status(resp,"Unable to authenticate.\nCheck your connection, your username and your password")
         oauth_verifier = dict(urlparse.parse_qsl(content))['oauth_verifier']
         token.set_verifier(oauth_verifier)
         client = oauth.Client(self.consumer,token)
         token_url = "%s%s/?%s" % (self.url_base, self.get_token, urllib.urlencode({ 'oauth_verifier' : oauth_verifier }))
         resp, content = client.request(token_url)
-        self.__check_status(resp)
+        self.__check_status(resp,"Couldn't authenticate connection.\nPlease verify your internet connection is working properly.")
         final_token = dict(urlparse.parse_qsl(content))['oauth_token']
         final_secret = dict(urlparse.parse_qsl(content))['oauth_token_secret']
         self.set_auth_token(final_token, final_secret)

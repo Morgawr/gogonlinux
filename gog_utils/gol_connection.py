@@ -1,23 +1,27 @@
+"""Module hosting class representing connection to GoL."""
+
 import json
 import requests
 import os
 import stat
 
-website_url = "http://www.gogonlinux.com"
-available_games = "/available"
-beta_games = "/available-beta"
+WEBSITE_URL = "http://www.gogonlinux.com"
+AVAILABLE_GAMES = "/available"
+BETA_GAMES = "/available-beta"
 
-#returns the json list of all available games
 def obtain_available_games():
-    resp = requests.get(url=(website_url+available_games))
+    """Returns JSON list of all available games."""
+    resp = requests.get(url=(WEBSITE_URL + AVAILABLE_GAMES))
     return json.loads(resp.text)
 
 def obtain_beta_available_games():
-    resp = requests.get(url=(website_url+beta_games))
+    """Obtains JSON list of all available beta games."""
+    resp = requests.get(url=(WEBSITE_URL + BETA_GAMES))
     return json.loads(resp.text)
 
 def download_script(target, url):
-    r = requests.get(url)
-    with open(target,"w+") as f:
-        f.write(r.content)
+    """Function to download data from url to target."""
+    reqs = requests.get(url)
+    with open(target, "w+") as file_handle:
+        file_handle.write(reqs.content)
     os.chmod(target, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)

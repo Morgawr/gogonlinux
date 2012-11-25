@@ -1,4 +1,4 @@
-
+"""Module hosting the class representing connection to GoG."""
 import oauth2 as oauth
 import urlparse
 import sys
@@ -8,7 +8,7 @@ import os
 
 
 class GogConnection:
-
+    """Class representing the connection to GoG."""
 
     #TODO: add support for dynamic protocol URL
     def __init__(self):
@@ -24,6 +24,13 @@ class GogConnection:
 
     #returns true only if resp status is 200 else it raises an exception
     def __check_status(self, resp, failure=None):
+        """Method to check the response status.
+        Throws an exception when return code isn't 200 else returns True.
+
+        Keyword arguments:
+        failure -- Custom exception message (default None)
+
+        """
         if resp['status'] == '200':
             return True
         if failure is not None:
@@ -31,6 +38,7 @@ class GogConnection:
         raise Exception("Invalid request, response %s." % resp['status'])
 
     def connect(self, username, password):
+        """Connects to GoG using passed username and password."""
         client = oauth.Client(self.consumer)
         resp, content = client.request(self.url_base+self.temp_token, "GET")
         self.__check_status(resp)
@@ -58,9 +66,11 @@ class GogConnection:
         print "Success"
 
     def set_auth_token(self, token, secret):
+        """Sets the authentication token using a token and a secret."""
         self.auth_token = oauth.Token(token, secret)
 
     def get_user_data(self):
+        """Gets user data from GoG."""
         if not ('auth_token' in dir(self)):
             raise Exception("Not logged in correctly.")
         
@@ -70,6 +80,7 @@ class GogConnection:
         return content
 
     def download_game(self, gameid, location):
+        """Downloads the game with gameid from Gog to location."""
         # this should work most of the time but I am not 100% sure 
         downloader = "%sdownloader2/installer/%s/0/" % (self.url_base, gameid)
         client = oauth.Client(self.consumer,self.auth_token)

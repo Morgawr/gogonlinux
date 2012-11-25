@@ -20,15 +20,15 @@ class GogDatabase:
     def __init__(self, dbfile):
         self.dbpath = dbfile
         if not os.path.exists(self.dbpath):
-            f = open(self.dbpath, 'w')
-            f.write("{ }")
-            f.close()
+            file_handle = open(self.dbpath, 'w')
+            file_handle.write("{ }")
+            file_handle.close()
 
     #reloads the database from the json file discarding any unstored changes
     def update(self):
-        f = open(self.dbpath)
-        data = json.load(f)
-        f.close()
+        file_handle = open(self.dbpath)
+        data = json.load(file_handle)
+        file_handle.close()
         self.games = {}
         for name, content in data.items():
             self.games[name] = GameRecord(name, content)

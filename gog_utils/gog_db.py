@@ -1,5 +1,9 @@
 import json
 import os
+import getpass
+import gog_filelock as FileLock
+
+filelock_path = os.path.join("/var","lock",getpass.getuser())
 
 class GogDatabase:
 
@@ -24,9 +28,11 @@ class GogDatabase:
 
     #stores changes to the local database file, on the filesystem
     def store(self):
-        f = open(self.dbpath,'w')
-        f.write(json.dumps(self.games, indent=4, default=GameRecord.serialize))
-        f.close()
+        # Locking for race condition purposes
+        with FileLock.FileLock(os.path.basename(self.dbpath),filelock_path):
+            f = open(self.dbpath,'w')
+            f.write(json.dumps(self.games, indent=4, default=GameRecord.serialize))
+            f.close()
 
     def remove_game(self, name):
         if self.has_game(name):

@@ -6,7 +6,7 @@ Class representing the database where all the game info is stored.
 import json
 import os
 import getpass
-import gog_filelock as FileLock
+import gog_utils.gog_filelock as FileLock
 
 filelock_path = os.path.join("/var", "lock", getpass.getuser())
 

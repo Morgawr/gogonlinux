@@ -40,8 +40,7 @@ class GogTuxGUI:
     game_data = {} # list of all available games from the website
     selected_game = None
 
-    window_base_title = "Gog Linux Client"
-
+    window_base_title = "Gog Linux Client - %s" % version
 
     def __init__(self, connection):
         self.connection = connection

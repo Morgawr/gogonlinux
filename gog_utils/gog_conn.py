@@ -2,10 +2,8 @@
 
 import oauth2 as oauth
 import urlparse
-import getpass
 import sys
 import urllib
-import time
 import json
 import os
 

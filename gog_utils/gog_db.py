@@ -35,10 +35,10 @@ class GogDatabase:
     def store(self):
         # Locking for race condition purposes
         with FileLock.FileLock(os.path.basename(self.dbpath), FILELOCK_PATH):
-            f = open(self.dbpath, 'w')
-            f.write(json.dumps(self.games, indent=4, 
+            file_handle = open(self.dbpath, 'w')
+            file_handle.write(json.dumps(self.games, indent=4, 
                                default=GameRecord.serialize))
-            f.close()
+            file_handle.close()
 
     def remove_game(self, name):
         if self.has_game(name):

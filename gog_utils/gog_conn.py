@@ -59,7 +59,7 @@ class GogConnection:
         login_url = "%s%s/?%s" % (self.url_base, self.auth_temp_token, enc_url)
         resp, content = auth_client.request(login_url, "GET")
         error_message = "%s\n%s" % ("Unable to authenticate.\n", 
-                                    "Check your connection," +
+                                    "Check your connection, " 
                                     "your username and your password")
         self.__check_status(resp, error_message)
         oauth_verifier = dict(urlparse.parse_qsl(content))['oauth_verifier']

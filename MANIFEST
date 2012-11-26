@@ -3,6 +3,7 @@ gog-tux
 setup.py
 LICENSE
 README
+MANIFEST
 gog_utils/__init__.py
 gog_utils/data_handle.py
 gog_utils/externalwindow.glade
@@ -11,6 +12,7 @@ gog_utils/gog_db.py
 gog_utils/gog_gui.py
 gog_utils/gog_tux.glade
 gog_utils/gol_connection.py
+gog_utils/gog_settings.py
 gog_utils/version.py
 gog_utils/gog_filelock.py
 gog_utils/login.glade

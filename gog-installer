@@ -165,13 +165,13 @@ def main(argv=None):
         database.update()
         if operation == 0:
             do_install(game_id, database, setupfile, token, secret, beta)
-        elif operation == 1:
-            do_uninstall(game_id, database)
-        elif operation == 2:
-            do_launch(game_id, database)
         else:
-            raise Exception("This shouldn't have happened, "
-                            "it's probably a bug. Operation failed.")
+            if not database.has_game(game_id):
+                raise Usage("Game is not installed in the current database")
+            if operation == 1:
+                do_uninstall(game_id, database)
+            elif operation == 2:
+                do_launch(game_id, database)
 
     except Usage, err:
         print >> sys.stderr, err.msg
@@ -309,8 +309,6 @@ def do_uninstall(game_id, database):
 
 def do_launch(game_id, database):
     """ Launch a game from the installed games local database. """
-    if not database.has_game(game_id):
-        raise Usage("Game is not installed in the current database")
     game = database.games[game_id]
     startup = os.path.join(game.install_path,"startgame.sh")
     subprocess.Popen([startup])       

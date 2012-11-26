@@ -244,6 +244,9 @@ class GogTuxGUI:
                                    buttons=(gtk.STOCK_CANCEL,
                                             gtk.RESPONSE_CANCEL,
                                             gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+        # Create default install path if it doesn't exist
+        if not os.path.exists(self.settings.data["install_path"]):
+            os.makedirs(self.settings.data["install_path"])
         chooser.set_current_folder(self.settings.data["install_path"])
         chooser.set_default_response(gtk.RESPONSE_OK)
         resp = chooser.run()

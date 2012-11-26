@@ -29,9 +29,10 @@ class GogDatabase:
         """
         Reload the database from the JSON file discarding any unstored changes.
         """
-        file_handle = open(self.dbpath)
-        data = json.load(file_handle)
-        file_handle.close()
+        with FileLock.FileLock(os.path.basename(self.dbpath), FILELOCK_PATH):
+            file_handle = open(self.dbpath)
+            data = json.load(file_handle)
+            file_handle.close()
         self.games = {}
         for name, content in data.items():
             self.games[name] = GameRecord(name, content)

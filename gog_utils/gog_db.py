@@ -27,7 +27,7 @@ class GogDatabase:
 
     def update(self):
         """
-        Reloads the database from the JSON file discarding any unstored changes.
+        Reload the database from the JSON file discarding any unstored changes.
         """
         file_handle = open(self.dbpath)
         data = json.load(file_handle)
@@ -37,7 +37,7 @@ class GogDatabase:
             self.games[name] = GameRecord(name, content)
 
     def store(self):
-        """ Stores changes to the local database file, on the filesystem. """
+        """ Store changes to the local database file, on the filesystem. """
         # Locking for race condition purposes
         with FileLock.FileLock(os.path.basename(self.dbpath), FILELOCK_PATH):
             file_handle = open(self.dbpath, 'w')
@@ -46,18 +46,18 @@ class GogDatabase:
             file_handle.close()
 
     def remove_game(self, name):
-        """ Removes a game from the database. """        
+        """ Remove a game from the database. """        
         if self.has_game(name):
             del self.games[name]
 
     def add_game(self, name, game):
-        """ Adds a game to the database. """
+        """ Add a game to the database. """
         if not self.has_game(name):
             self.games[name] = game
 
     def has_game(self, name):
         """ 
-        Checks whether a game is in the database. 
+        Check whether a game is in the database. 
         This basically means whether the game is
         installed or not
         """
@@ -105,7 +105,7 @@ class GameRecord(json.JSONEncoder):
     
     @staticmethod
     def serialize(obj):
-        """ Serializes a GameRecord object. """
+        """ Serialize a GameRecord object. """
         data = {}
         data["install_path"] = obj.install_path
         data["install_script"] = obj.install_script

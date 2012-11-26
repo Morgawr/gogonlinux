@@ -13,13 +13,13 @@ AVAILABLE_GAMES = "/available"
 BETA_GAMES = "/available-beta"
 
 def obtain_available_games():
-    """ Returns JSON list of all available games. """
+    """ Return JSON list of all available games. """
     resp = requests.get(url=(WEBSITE_URL + AVAILABLE_GAMES))
     return json.loads(resp.text) #pylint: disable=E1103
 
 def obtain_beta_available_games():
     """
-    Obtains JSON list of all available games, even 
+    Obtain JSON list of all available games, even 
     the ones flagged as beta/unreleased
     """
     resp = requests.get(url=(WEBSITE_URL + BETA_GAMES))
@@ -27,8 +27,8 @@ def obtain_beta_available_games():
 
 def download_script(target, url):
     """ 
-    Downloads a script from the gogonlinux url
-    and saves it to the target position
+    Download a script from the gogonlinux url
+    and save it to the target position
     """
     reqs = requests.get(url)
     with open(target, "w+") as file_handle:

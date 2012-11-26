@@ -31,7 +31,7 @@ class GogConnection:
     def __check_status(self, resp, failure=None):
         """ 
         Method to check the response status.
-        Throws an exception when return code isn't 200 else returns True.
+        Throw an exception when return code isn't 200 else return True.
 
         Keyword arguments:
         failure -- Custom exception message (default None)
@@ -44,7 +44,7 @@ class GogConnection:
         raise Exception("Invalid request, response %s." % resp['status'])
 
     def connect(self, username, password):
-        """ Connects to gog.com using the defined username and password. """
+        """ Connect to gog.com using the defined username and password. """
         client = oauth.Client(self.consumer)
         resp, content = client.request(self.url_base+self.temp_token, "GET")
         self.__check_status(resp)
@@ -80,11 +80,11 @@ class GogConnection:
         print "Success"
 
     def set_auth_token(self, token, secret):
-        """ Sets the authentication token using a token and a secret key """
+        """ Set the authentication token using a token and a secret key """
         self.auth_token = oauth.Token(token, secret)
 
     def get_user_data(self):
-        """ Gets user profile data from gog.com """
+        """ Get user profile data from gog.com """
         if not ('auth_token' in dir(self)):
             raise Exception("Not logged in correctly.")
         
@@ -96,7 +96,7 @@ class GogConnection:
 
     def download_game(self, gameid, location):
         """ 
-        Downloads the game with the specified gameid 
+        Download the game with the specified gameid 
         from gog.com to the specified location. 
         """
         # this should work most of the time but I am not 100% sure 

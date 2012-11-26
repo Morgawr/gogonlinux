@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+""" Executable for the GUI interface of gogonlinux project. """
 
 from gog_utils import gog_gui
 from gog_utils import gog_conn

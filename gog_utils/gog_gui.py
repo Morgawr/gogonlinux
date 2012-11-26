@@ -293,7 +293,7 @@ class GogTuxGUI:
             self.uninstallbutton.set_sensitive(True)
             self.installbutton.set_sensitive(False)
             self.launchbutton.set_sensitive(True)
-            self.gameinstalledlabel.set_text(found_game)
+            self.gameinstalledlabel.set_text(found_game.install_path)
         else:
             self.uninstallbutton.set_sensitive(False)
             self.installbutton.set_sensitive(True)

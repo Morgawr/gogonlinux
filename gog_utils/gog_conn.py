@@ -1,4 +1,7 @@
-"""Module hosting the class representing connection to GoG."""
+""" 
+Module hosting the class representing connection to the
+gog.com web API.
+"""
 import oauth2 as oauth
 import urlparse
 import sys
@@ -8,7 +11,9 @@ import os
 
 
 class GogConnection:
-    """Class representing the connection to GoG."""
+    """ Class representing the connection to gog.com """
+
+    auth_token = None
 
     #TODO: add support for dynamic protocol URL
     def __init__(self):
@@ -24,7 +29,8 @@ class GogConnection:
 
     #returns true only if resp status is 200 else it raises an exception
     def __check_status(self, resp, failure=None):
-        """Method to check the response status.
+        """ 
+        Method to check the response status.
         Throws an exception when return code isn't 200 else returns True.
 
         Keyword arguments:
@@ -38,7 +44,7 @@ class GogConnection:
         raise Exception("Invalid request, response %s." % resp['status'])
 
     def connect(self, username, password):
-        """Connects to GoG using passed username and password."""
+        """ Connects to gog.com using the defined username and password. """
         client = oauth.Client(self.consumer)
         resp, content = client.request(self.url_base+self.temp_token, "GET")
         self.__check_status(resp)
@@ -62,7 +68,9 @@ class GogConnection:
         enc_url = urllib.urlencode({ 'oauth_verifier' : oauth_verifier })
         token_url = "%s%s/?%s" % (self.url_base, self.get_token, enc_url)
         resp, content = client.request(token_url)
-        self.__check_status(resp, error_message)
+        self.__check_status(resp, "Couldn't authenticate connection.\n"
+                                  "Please verify your internet connection "
+                                  "is working properly.")
         final_token = dict(urlparse.parse_qsl(content))['oauth_token']
         final_secret = dict(urlparse.parse_qsl(content))['oauth_token_secret']
         self.set_auth_token(final_token, final_secret)
@@ -72,11 +80,11 @@ class GogConnection:
         print "Success"
 
     def set_auth_token(self, token, secret):
-        """Sets the authentication token using a token and a secret."""
+        """ Sets the authentication token using a token and a secret key """
         self.auth_token = oauth.Token(token, secret)
 
     def get_user_data(self):
-        """Gets user data from GoG."""
+        """ Gets user profile data from gog.com """
         if not ('auth_token' in dir(self)):
             raise Exception("Not logged in correctly.")
         
@@ -87,7 +95,10 @@ class GogConnection:
         return content
 
     def download_game(self, gameid, location):
-        """Downloads the game with gameid from Gog to location."""
+        """ 
+        Downloads the game with the specified gameid 
+        from gog.com to the specified location. 
+        """
         # this should work most of the time but I am not 100% sure 
         downloader = "%sdownloader2/installer/%s/0/" % (self.url_base, gameid)
         client = oauth.Client(self.consumer, self.auth_token)

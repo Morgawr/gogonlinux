@@ -1,4 +1,7 @@
-"""Module hosting class representing connection to GoL."""
+""" 
+Module hosting class representing the connection data
+to the gogonlinux website
+"""
 
 import json
 import requests
@@ -10,17 +13,23 @@ AVAILABLE_GAMES = "/available"
 BETA_GAMES = "/available-beta"
 
 def obtain_available_games():
-    """Returns JSON list of all available games."""
+    """ Returns JSON list of all available games. """
     resp = requests.get(url=(WEBSITE_URL + AVAILABLE_GAMES))
     return json.loads(resp.text) #pylint: disable=E1103
 
 def obtain_beta_available_games():
-    """Obtains JSON list of all available beta games."""
+    """
+    Obtains JSON list of all available games, even 
+    the ones flagged as beta/unreleased
+    """
     resp = requests.get(url=(WEBSITE_URL + BETA_GAMES))
     return json.loads(resp.text) #pylint: disable=E1103
 
 def download_script(target, url):
-    """Function to download data from url to target."""
+    """ 
+    Downloads a script from the gogonlinux url
+    and saves it to the target position
+    """
     reqs = requests.get(url)
     with open(target, "w+") as file_handle:
         file_handle.write(reqs.content) #pylint: disable=E1103

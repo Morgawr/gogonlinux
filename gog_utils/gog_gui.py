@@ -289,11 +289,11 @@ class GogTuxGUI:
         launch it, else it lets the user install/download it.
         """
         if game_id in self.database.games.keys():
-            game = self.database.games[game_id]
+            found_game = self.database.games[game_id]
             self.uninstallbutton.set_sensitive(True)
             self.installbutton.set_sensitive(False)
             self.launchbutton.set_sensitive(True)
-            self.gameinstalledlabel.set_text(game)
+            self.gameinstalledlabel.set_text(found_game)
         else:
             self.uninstallbutton.set_sensitive(False)
             self.installbutton.set_sensitive(True)

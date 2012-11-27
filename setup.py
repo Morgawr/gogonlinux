@@ -17,6 +17,7 @@ setup(name='gogonlinux',
                         "and an easy to setup and install/uninstall package for all gog games. "
                         "A gog account is required."),
       data_files=[('/usr/local/share/applications/',['data/gog-tux.desktop']),
-                  ('/usr/local/share/icons/',['gog_utils/imgdata/gog-tux-icon.svg'])],
+                  ('/usr/local/share/icons/',['gog_utils/imgdata/gog-tux-icon.svg'])
+                  ('/usr/local/man/man1/',['gog-installer.1']],
       platforms=['GNU/Linux']
       )

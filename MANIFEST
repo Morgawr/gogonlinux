@@ -11,6 +11,7 @@ gog_utils/gog_conn.py
 gog_utils/gog_db.py
 gog_utils/gog_gui.py
 gog_utils/gog_tux.glade
+gog_utils/updatewindow.glade
 gog_utils/gol_connection.py
 gog_utils/gog_settings.py
 gog_utils/version.py

@@ -73,7 +73,8 @@ class GogTuxGUI:
                     "on_launchbutton_activated" : self.launchbutton_activated,
                     "on_uninstallbutton_activated" : self.uninstallbutton_activated,
                     "on_logoutmenu_activated" : self.do_logout,
-                    "on_loginmenu_activated" : self.do_login }
+                    "on_loginmenu_activated" : self.do_login,
+                    "updatemenu_activated" : self.check_for_updates }
         self.glade_tree.signal_autoconnect(signals)
         #obtain required resources
         self.window = self.glade_tree.get_widget("gog_tux")
@@ -308,6 +309,23 @@ class GogTuxGUI:
         thread = threading.Thread(target=self.do_set_cover_image,
                                   args=(self.gamecoverimage, game["cover_url"]))
         thread.start()
+
+    def check_for_updates(self, widget):
+        """ 
+        Check for updates on launcher scripts for each installed game and prompt
+        the user to select which update he wants to install.
+        """
+        gamelist = {}
+        model = self.installedgamestree.get_model()
+        iter = model.get_iter_first()
+        while iter is not None:
+            id = model.get_value(iter, 3)
+            iter = model.iter_next(iter)
+            gamelist[id] = self.database.games[id]
+        if not gamelist: # In case it's empty
+            self.show_error("There are no games installed.")
+            return
+        UpdateWindow(gamelist)
 
     def key_pressed(self, widget, data):
         """ Function hooked to key pressing for the whole window. """
@@ -681,4 +699,60 @@ class ExternalOutputWindow:
             self.process.send_signal(signal.SIGINT)
         else: # if we are done
             self.cleanup()
+
+class UpdateWindow:
+    """ 
+    This class shows a windows with a list of updateable installed games and
+    asks the user to update them or not.
+    """
+    
+    games = None
+    window = None
+    gladeFile = None
+    selected = None
+
+    def __init__(self, gamelist):
+        if gamelist is None:
+            raise Exception("You need at least one game to update.")
+        self.games = gamelist
+        self.gladeFile = gtk.glade.XML(os.path.join(PACKAGE_DIRECTORY,
+                                       "updatewindow.glade"))
+        signals = { "on_cancelbutton_activated" : self.close_window,
+                    "on_okbutton_activated" : self.run_update }
+        self.gladeFile.signal_autoconnect(signals)
+        self.window = self.gladeFile.get_widget("updatewindow")
+        self.create_list_data()
+        self.window.show()
+
+    def create_list_data(self):
+        """ Adds elements to the listview tree. """
+        updatelisttree = self.gladeFile.get_widget("updatelisttree")
+        textrenderer = gtk.CellRendererText()
+        togglerenderer = gtk.CellRendererToggle()
+        columna = gtk.TreeViewColumn("Games", textrenderer, text=0)
+        columnb = gtk.TreeViewColumn("Update", togglerenderer, active=1)
+        self.selected = gtk.ListStore(gobject.TYPE_STRING,
+                                      gobject.TYPE_BOOLEAN,
+                                      gobject.TYPE_STRING)
+        updatelisttree.append_column(columna)
+        updatelisttree.append_column(columnb)
+        self.selected.set_sort_column_id(0, gtk.SORT_ASCENDING)
+        updatelisttree.set_model(self.selected)
+        togglerenderer.connect("toggled", self.__toggled, updatelisttree)
+        for item in self.games.keys():
+            self.selected.append((self.games[item].full_name, False,
+                                  self.games[item].online_id))
+
+    def __toggled(self, toggle, path, *ignore):
+        """ Signal connected to the action of toggling the update checkbox. """
+        iter = self.selected.get_iter(path)
+        self.selected.set_value(iter, 1, not self.selected.get_value(iter,1))
+
+    def close_window(self, widget):
+        """ Signal triggered when cancel button is clicked. """
+        self.window.destroy()
+
+    def run_update(self, widget):
+        """ Signal triggered when the ok button is clicked. """
+        pass
 

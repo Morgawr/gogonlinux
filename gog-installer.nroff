@@ -1,0 +1,81 @@
+.TH gog-installer 1 27/11/2012
+
+.SH NAME
+
+gog-installer - command line tool for managing www.gogonlinux.com games
+
+.SH SYNOPSIS
+
+.B gog-installer [OPTIONS] [COMMAND] game_id
+
+.SH DESCRIPTION
+
+gog-installer is a tool used to install/uninstall and launch games downloaded
+from gog.com and ported to Linux from the gogonlinux project.
+
+.SH OPTIONS
+
+.TP 5
+
+--token=<token> 
+The secret authorization token if you have already authenticated through
+gog.com online API.
+
+.TP
+
+--secret=<secret>
+The secret authorization key if you have already authenticated through 
+gog.com online API.
+
+.TP
+
+--install-path=<path> 
+The path where you want to install the selected game.
+
+.TP 
+
+--setup=<setup.exe> 
+The path of the already installed setup.exe file if you do not want to 
+download one from gog.com.
+
+.TP
+
+--beta
+This enables support for beta (not yet officially released) gogonlinux games
+
+.SH COMMANDS
+
+.TP 5
+
+-h, --help
+Displays the usage text in the appplication
+
+.TP
+
+-u, --uninstall
+Used to uninstall a given game id from the local database of installed games
+
+.TP
+
+-r, --run
+Used to run a game without having to change to the game's install directory
+
+.TP
+
+--version
+Displays the version of the software
+
+.TP
+
+--list
+Shows a list of all the installed games in the local database
+
+.TP
+
+--available
+Shows a list of all the available games found on the gogonlinux project
+
+.SH AUTHOR
+
+This software is part of the gogonlinux.com project created by 
+Morgawr, <morgawr@gmail.com>

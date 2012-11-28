@@ -8,6 +8,8 @@ This module also represents the game records that are stored in the database.
 import json
 import os
 import getpass
+import hashlib
+
 import gog_utils.gog_filelock as FileLock
 
 FILELOCK_PATH = os.path.join("/var", "lock", getpass.getuser())
@@ -103,6 +105,20 @@ class GameRecord(json.JSONEncoder):
             self.emulation = data["emulation"]
             self.cover_url = data["cover_url"]
             self.compat = data["compat"]
+
+    def obtain_launcher_md5(self):
+        """
+        Check the md5 digest on the locally installed launcher script for the
+        related game record.
+        """
+        path = os.path.join(self.install_path, "startgame.sh")
+        if not os.path.exists(path):
+            return ""
+        file_handle = open(path, 'r')
+        data = file_handle.read()
+        file_handle.close()
+        return hashlib.md5(data).hexdigest()
+
     
     @staticmethod
     def serialize(obj):

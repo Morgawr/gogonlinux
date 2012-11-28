@@ -710,6 +710,11 @@ class UpdateWindow:
     window = None
     gladeFile = None
     selected = None
+    statusbox = None
+    statusspinner = None
+    messagelabel = None
+    done = False
+    selectedcount = 0
 
     def __init__(self, gamelist):
         if gamelist is None:
@@ -721,6 +726,10 @@ class UpdateWindow:
                     "on_okbutton_activated" : self.run_update }
         self.gladeFile.signal_autoconnect(signals)
         self.window = self.gladeFile.get_widget("updatewindow")
+        self.statusbox = self.gladeFile.get_widget("statusbox")
+        self.statusspinner = self.gladeFile.get_widget("statusspinner")
+        self.messagelabel = self.gladeFile.get_widget("messagelabel")
+        self.statusbox.hide()
         self.create_list_data()
         self.window.show()
 
@@ -746,13 +755,58 @@ class UpdateWindow:
     def __toggled(self, toggle, path, *ignore):
         """ Signal connected to the action of toggling the update checkbox. """
         iter = self.selected.get_iter(path)
-        self.selected.set_value(iter, 1, not self.selected.get_value(iter,1))
+        value = self.selected.get_value(iter, 1)
+        if value:
+            self.selectedcount -= 1
+        else:
+            self.selectedcount += 1
+        self.selected.set_value(iter, 1, not value)
 
     def close_window(self, widget):
         """ Signal triggered when cancel button is clicked. """
         self.window.destroy()
 
+    def __threaded_update(self):
+        """ Manage the connection and checking for updates in a thread. """
+        iter = self.selected.get_iter_first()
+        data = site_conn.obtain_launch_md5_list()
+        while iter is not None:
+            if self.selected.get_value(iter,1) is True:
+                gameid = self.selected.get_value(iter,2)
+                gamemd5 = self.games[gameid].obtain_launcher_md5()
+                if data[gameid]["md5"] != gamemd5:
+                    msg = ("%s has outdated launcher.\n"
+                           "Updating launcher script..." % 
+                                                   self.games[gameid].full_name)
+                                      
+                    self.update_status(msg)
+                    path = self.games[gameid].install_path
+                    launch_script = os.path.join(path, "startgame.sh")
+                    site_conn.download_script(launch_script,
+                                              data[gameid]["url"]) 
+            iter = self.selected.iter_next(iter)
+        self.update_status("Update successful.")
+        self.statusspinner.stop()
+        self.done = True
+        okbutton = self.gladeFile.get_widget("okbutton")
+        okbutton.set_sensitive(True)
+        okbutton.set_label("Done")
+
     def run_update(self, widget):
         """ Signal triggered when the ok button is clicked. """
-        pass
+        if self.done or self.selectedcount == 0:
+            self.close_window(None)
+            return
+        self.statusbox.show()
+        self.statusspinner.start()
+        cancelbutton = self.gladeFile.get_widget("cancelbutton")
+        cancelbutton.set_sensitive(False)
+        okbutton = self.gladeFile.get_widget("okbutton")
+        okbutton.set_sensitive(False)
+        self.update_status("Performing update...")
+        thread = threading.Thread(target=self.__threaded_update)
+        thread.start()
 
+    def update_status(self, message):
+        """ Print a status message in the messagelabel on screen. """
+        self.messagelabel.set_text(message)

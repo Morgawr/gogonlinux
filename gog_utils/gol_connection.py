@@ -34,3 +34,14 @@ def download_script(target, url):
     with open(target, "w+") as file_handle:
         file_handle.write(reqs.content) #pylint: disable=E1103
     os.chmod(target, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+def obtain_launch_md5_list():
+    """
+    Download the data from the md5 list of launcher scripts on gogonlinux to
+    check if there are new updates for each individual game.
+    """
+    try:
+        resp = requests.get(url=(WEBSITE_URL + "/launcher_md5"))
+        return json.loads(resp.text)
+    except requests.ConnectionError:
+        return "{}"

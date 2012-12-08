@@ -4,6 +4,7 @@ gog.com web API.
 """
 import oauth2 as oauth
 import urlparse
+import requests
 import sys
 import urllib
 import json
@@ -17,15 +18,38 @@ class GogConnection:
 
     #TODO: add support for dynamic protocol URL
     def __init__(self):
+
         self.url_base = "https://api.gog.com/en/"
         self.protocol = "downloader2/status/RELEASE/"
-        self.temp_token = "oauth/initialize"
-        self.auth_temp_token = "oauth/login"
-        self.get_token = "oauth/token"
-        
+        data = self.__obtain_url_details()
+        self.temp_token = data["oauth_get_temp_token"]
+        #self.temp_token = "oauth/initialize"
+        self.auth_temp_token = data["oauth_authorize_temp_token"]
+        #self.auth_temp_token = "oauth/login"
+        self.get_token = data["oauth_get_token"]
+        #self.get_token = "oauth/token"
+        self.user_url = data["get_user_details"]
+        self.user_games = data["get_user_games"] # This does not work yet :(
+        self.game_details = data["get_game_details"]
+        self.game_installer = data["get_installer_link"]
+        self.game_extras = data["get_extra_link"]
+
         client_key = '1f444d14ea8ec776585524a33f6ecc1c413ed4a5'
         client_secret = '20d175147f9db9a10fc0584aa128090217b9cf88'
         self.consumer = oauth.Consumer(client_key, client_secret)
+
+    def __obtain_url_details(self):
+       """
+       Return a dictionary with the required methods for interacting with
+       gog.com and their respective URLs.
+       """
+       res = requests.get(self.url_base+self.protocol)
+       if res.status_code != 200:
+           raise Exception("Could not connect to the gog.com API.")
+       return json.loads(res.text)["config"] # I should just use res.json maybe
+       
+
+
 
     #returns true only if resp status is 200 else it raises an exception
     def __check_status(self, resp, failure=None):
@@ -46,7 +70,8 @@ class GogConnection:
     def connect(self, username, password):
         """ Connect to gog.com using the defined username and password. """
         client = oauth.Client(self.consumer)
-        resp, content = client.request(self.url_base+self.temp_token, "GET")
+        #resp, content = client.request(self.url_base+self.temp_token, "GET")
+        resp, content = client.request(self.temp_token, "GET")
         self.__check_status(resp)
         request_token = dict(urlparse.parse_qsl(content))
         temp_secret = request_token['oauth_token_secret']
@@ -56,7 +81,7 @@ class GogConnection:
         print "Authenticating..."
         enc_url = urllib.urlencode({ 'password' : password, 
                                      'username' : username })
-        login_url = "%s%s/?%s" % (self.url_base, self.auth_temp_token, enc_url)
+        login_url = "%s/?%s" % (self.auth_temp_token, enc_url)
         resp, content = auth_client.request(login_url, "GET")
         error_message = "%s\n%s" % ("Unable to authenticate.\n", 
                                     "Check your connection, " 
@@ -66,7 +91,7 @@ class GogConnection:
         token.set_verifier(oauth_verifier)
         client = oauth.Client(self.consumer, token)
         enc_url = urllib.urlencode({ 'oauth_verifier' : oauth_verifier })
-        token_url = "%s%s/?%s" % (self.url_base, self.get_token, enc_url)
+        token_url = "%s/?%s" % (self.get_token, enc_url)
         resp, content = client.request(token_url)
         self.__check_status(resp, "Couldn't authenticate connection.\n"
                                   "Please verify your internet connection "
@@ -89,8 +114,8 @@ class GogConnection:
             raise Exception("Not logged in correctly.")
         
         client = oauth.Client(self.consumer, self.auth_token)
-        user_url = "https://api.gog.com/en/downloader2/user/"
-        resp, content = client.request(user_url)
+        #user_url = "https://api.gog.com/en/downloader2/user/"
+        resp, content = client.request(self.user_url)
         self.__check_status(resp)
         return content
 
@@ -100,26 +125,38 @@ class GogConnection:
         from gog.com to the specified location. 
         """
         # this should work most of the time but I am not 100% sure 
-        downloader = "%sdownloader2/installer/%s/0/" % (self.url_base, gameid)
         client = oauth.Client(self.consumer, self.auth_token)
+        resp, content = client.request(self.game_details+gameid)
+        self.__check_status(resp)
+        installer_data = json.loads(content)["game"]["win_installer"][0]
+        installer_id = installer_data["id"]
+        installer_size = installer_data["size_mb"]
+        downloader = "%s/%s/%s/" % (self.game_installer, gameid, installer_id)
         resp, content = client.request(downloader)
         self.__check_status(resp)
         download_url = json.loads(content)["file"]["link"]
         download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
         req = urllib.urlopen(download_url)
+        size_in_kb = installer_size/1024
         chunk = 512*1024 # 512KB each chunk
-        size = 0
+        downloaded = 0
         path = os.path.join(location, "setup_%s.exe" % gameid)
+        percentage = 0
+        (downloaded/size_in_kb)*100
+        print "Need to obtain %sMB of data" % installer_size
+        print "0\%"
         with open(path, 'wb') as file_handle:
             while True:
-                sys.stdout.write('.')
-                sys.stdout.flush()
+                new_percentage = int(((downloaded/1024)/size_in_kb)*100)
+                if new_percentage != percentage:
+                    percentage = new_percentage
+                    print "%s\%" % percentage
                 data = req.read(chunk)
                 if not data:
                     break
-                size += chunk
+                downloaded += chunk
                 file_handle.write(data)
-            print "%d KB written" % (size/1024)
+            print "%d KB written" % (downloaded/1024)
         return path
 
 

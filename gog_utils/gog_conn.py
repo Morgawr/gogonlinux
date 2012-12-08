@@ -137,20 +137,20 @@ class GogConnection:
         download_url = json.loads(content)["file"]["link"]
         download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
         req = urllib.urlopen(download_url)
-        size_in_kb = installer_size/1024
+        size_in_kb = int(installer_size)*1024
         chunk = 512*1024 # 512KB each chunk
         downloaded = 0
         path = os.path.join(location, "setup_%s.exe" % gameid)
         percentage = 0
-        (downloaded/size_in_kb)*100
         print "Need to obtain %sMB of data" % installer_size
-        print "0\%"
+        print "0%"
         with open(path, 'wb') as file_handle:
             while True:
-                new_percentage = int(((downloaded/1024)/size_in_kb)*100)
+                new_percentage = int((float(downloaded)/
+                                     (float(size_in_kb)*1024))*100)
                 if new_percentage != percentage:
                     percentage = new_percentage
-                    print "%s\%" % percentage
+                    print "%s%%" % percentage
                 data = req.read(chunk)
                 if not data:
                     break
@@ -158,6 +158,4 @@ class GogConnection:
                 file_handle.write(data)
             print "%d KB written" % (downloaded/1024)
         return path
-
-
 

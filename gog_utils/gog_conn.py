@@ -16,18 +16,14 @@ class GogConnection:
 
     auth_token = None
 
-    #TODO: add support for dynamic protocol URL
     def __init__(self):
 
         self.url_base = "https://api.gog.com/en/"
         self.protocol = "downloader2/status/RELEASE/"
         data = self.__obtain_url_details()
         self.temp_token = data["oauth_get_temp_token"]
-        #self.temp_token = "oauth/initialize"
         self.auth_temp_token = data["oauth_authorize_temp_token"]
-        #self.auth_temp_token = "oauth/login"
         self.get_token = data["oauth_get_token"]
-        #self.get_token = "oauth/token"
         self.user_url = data["get_user_details"]
         self.user_games = data["get_user_games"] # This does not work yet :(
         self.game_details = data["get_game_details"]
@@ -114,7 +110,6 @@ class GogConnection:
             raise Exception("Not logged in correctly.")
         
         client = oauth.Client(self.consumer, self.auth_token)
-        #user_url = "https://api.gog.com/en/downloader2/user/"
         resp, content = client.request(self.user_url)
         self.__check_status(resp)
         return content

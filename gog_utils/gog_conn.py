@@ -125,14 +125,15 @@ class GogConnection:
         self.__check_status(resp)
         installer_data = json.loads(content)["game"]["win_installer"][0]
         installer_id = installer_data["id"]
-        installer_size = installer_data["size_mb"]
+        # We need to replace , with . for decimal places
+        installer_size = installer_data["size_mb"].replace(',','.')
         downloader = "%s/%s/%s/" % (self.game_installer, gameid, installer_id)
         resp, content = client.request(downloader)
         self.__check_status(resp)
         download_url = json.loads(content)["file"]["link"]
         download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
         req = urllib.urlopen(download_url)
-        size_in_kb = int(installer_size)*1024
+        size_in_kb = float(installer_size)*1024
         chunk = 512*1024 # 512KB each chunk
         downloaded = 0
         path = os.path.join(location, "setup_%s.exe" % gameid)

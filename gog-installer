@@ -211,7 +211,6 @@ def do_install(game_id, database, setupfile, token, secret, beta):
         deletesetup = True
         try:
             setup = conn.download_game(game_id, tempfile.gettempdir())
-            print "DEBUG: %s" % setup
         except Exception as err:
             if "403" in str(err):
                 print ("You do not have the permissions to download this "

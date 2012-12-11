@@ -35,15 +35,14 @@ class GogConnection:
         self.consumer = oauth.Consumer(client_key, client_secret)
 
     def __obtain_url_details(self):
-       """
-       Return a dictionary with the required methods for interacting with
-       gog.com and their respective URLs.
-       """
-       res = requests.get(self.url_base+self.protocol)
-       if res.status_code != 200:
-           raise Exception("Could not connect to the gog.com API.")
-       return json.loads(res.text)["config"] # I should just use res.json maybe
-       
+        """
+        Return a dictionary with the required methods for interacting with
+        gog.com and their respective URLs.
+        """
+        res = requests.get(self.url_base+self.protocol)
+        if res.status_code != 200:
+            raise Exception("Could not connect to the gog.com API.")
+        return json.loads(res.text)["config"] # I should just use res.json maybe
 
 
 

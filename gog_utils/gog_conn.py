@@ -133,20 +133,20 @@ class GogConnection:
         total_size = 0
         download_urls = {}
         for installer_data in installers:
-             installer_id = installer_data["id"]
-             # We need to replace , with . for decimal places
-             installer_size = installer_data["size_mb"].replace(',','.')
-             downloader = "%s/%s/%s/" % (self.game_installer,
-                                         gameid, installer_id)
-             resp, content = client.request(downloader)
-             self.__check_status(resp)
-             download_url = json.loads(content)["file"]["link"]
-             download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
-             local_path = installer_data["path"]
-             # Remove the part that is not relevant to the filename
-             local_path = __obtain_installer_name(local_path)
-             download_urls[local_path] = download_url
-             total_size += float(installer_size)
+            installer_id = installer_data["id"]
+            # We need to replace , with . for decimal places
+            installer_size = installer_data["size_mb"].replace(',','.')
+            downloader = "%s/%s/%s/" % (self.game_installer,
+                                        gameid, installer_id)
+            resp, content = client.request(downloader)
+            self.__check_status(resp)
+            download_url = json.loads(content)["file"]["link"]
+            download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
+            local_path = installer_data["path"]
+            # Remove the part that is not relevant to the filename
+            local_path = __obtain_installer_name(local_path)
+            download_urls[local_path] = download_url
+            total_size += float(installer_size)
 
         size_in_kb = installer_size*1024
         chunk = 512*1024 # 512KB each chunk

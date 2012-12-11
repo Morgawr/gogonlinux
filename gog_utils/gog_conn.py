@@ -113,6 +113,13 @@ class GogConnection:
         self.__check_status(resp)
         return content
 
+    def __obtain_installer_name(installer):
+        """ 
+        Return the name of the setup.exe file without the game name and id
+        path added before it.
+        """
+        return installer[installer.find("setup_"):]
+
     def download_game(self, gameid, location):
         """ 
         Download the game with the specified gameid 
@@ -122,38 +129,51 @@ class GogConnection:
         client = oauth.Client(self.consumer, self.auth_token)
         resp, content = client.request(self.game_details+gameid)
         self.__check_status(resp)
-        installer_data = json.loads(content)["game"]["win_installer"][0]
-        installer_id = installer_data["id"]
-        # We need to replace , with . for decimal places
-        installer_size = installer_data["size_mb"].replace(',','.')
-        downloader = "%s/%s/%s/" % (self.game_installer, gameid, installer_id)
-        resp, content = client.request(downloader)
-        self.__check_status(resp)
-        download_url = json.loads(content)["file"]["link"]
-        download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
-        req = urllib.urlopen(download_url)
-        size_in_kb = float(installer_size)*1024
+        installers = json.loads(content)["game"]["win_installer"]
+        total_size = 0
+        download_urls = {}
+        for installer_data in installers:
+             installer_id = installer_data["id"]
+             # We need to replace , with . for decimal places
+             installer_size = installer_data["size_mb"].replace(',','.')
+             downloader = "%s/%s/%s/" % (self.game_installer,
+                                         gameid, installer_id)
+             resp, content = client.request(downloader)
+             self.__check_status(resp)
+             download_url = json.loads(content)["file"]["link"]
+             download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
+             local_path = installer_data["path"]
+             # Remove the part that is not relevant to the filename
+             local_path = __obtain_installer_name(local_path)
+             download_urls[local_path] = download_url
+             total_size += float(installer_size)
+
+        size_in_kb = installer_size*1024
         chunk = 512*1024 # 512KB each chunk
         downloaded = 0
-        path = os.path.join(location, "setup_%s.exe" % gameid)
-        if os.path.exists(path):
-            raise Exception("A file already exists at that location, "
-                            "cannot proceed with download.")
-        percentage = 0
-        print "Need to obtain %sMB of data" % installer_size
-        print "0%"
-        with open(path, 'wb') as file_handle:
-            while True:
-                new_percentage = int((float(downloaded)/
-                                     (float(size_in_kb)*1024))*100)
-                if new_percentage != percentage:
-                    percentage = new_percentage
-                    print "%s%%" % percentage
-                data = req.read(chunk)
-                if not data:
-                    break
-                downloaded += chunk
-                file_handle.write(data)
-            print "%d KB written" % (downloaded/1024)
-        return path
+        print "Need to obtain %sMB of data" % total_size
+        for key in download_urls.keys():
+            path = os.path.join(location, key)
+            if os.path.exists(path):
+                raise Exception("[%s]: A file already exists at this location, "
+                                "cannot proceed with download." % path)
+            percentage = 0
+            print "0%"
+            req = urllib.urlopen(download_urls[key])
+            with open(path, 'wb') as file_handle:
+                while True:
+                    new_percentage = int((float(downloaded)/
+                                         (float(size_in_kb)*1024))*100)
+                    if new_percentage != percentage:
+                        percentage = new_percentage
+                        print "%s%%" % percentage
+                    data = req.read(chunk)
+                    if not data:
+                        break
+                    downloaded += chunk
+                    file_handle.write(data)
+                print "[%s]: %d KB written" % (path, (downloaded/1024))
+        entry_path = installers[0]["path"]
+        entry_path = __obtain_installer_name(entry_path)
+        return os.path.join(location, entry_path)
 

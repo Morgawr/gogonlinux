@@ -136,6 +136,9 @@ class GogConnection:
         chunk = 512*1024 # 512KB each chunk
         downloaded = 0
         path = os.path.join(location, "setup_%s.exe" % gameid)
+        if os.path.exists(path):
+            raise Exception("A file already exists at that location, "
+                            "cannot proceed with download.")
         percentage = 0
         print "Need to obtain %sMB of data" % installer_size
         print "0%"

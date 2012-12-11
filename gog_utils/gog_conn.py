@@ -148,12 +148,12 @@ class GogConnection:
             download_urls.append((local_path, download_url, installer_size))
             total_size += float(installer_size)
 
-        size_in_kb = total_size*1024
         chunk = 512*1024 # 512KB each chunk
-        downloaded = 0
         print "Need to obtain %sMB of data" % total_size
         for element in download_urls:
+            downloaded = 0
             (key, url, size) = element
+            size_in_kb = float(size)*1024
             path = os.path.join(location, key)
             if os.path.exists(path):
                 raise Exception("[%s]: A file already exists at this location, "

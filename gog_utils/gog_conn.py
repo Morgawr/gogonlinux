@@ -131,7 +131,7 @@ class GogConnection:
         self.__check_status(resp)
         installers = json.loads(content)["game"]["win_installer"]
         total_size = 0
-        download_urls = {}
+        download_urls = []
         for installer_data in installers:
             installer_id = installer_data["id"]
             # We need to replace , with . for decimal places
@@ -145,21 +145,23 @@ class GogConnection:
             local_path = installer_data["path"]
             # Remove the part that is not relevant to the filename
             local_path = self.__obtain_installer_name(local_path)
-            download_urls[local_path] = download_url
+            download_urls.append((local_path, download_url, installer_size))
             total_size += float(installer_size)
 
         size_in_kb = installer_size*1024
         chunk = 512*1024 # 512KB each chunk
         downloaded = 0
         print "Need to obtain %sMB of data" % total_size
-        for key in download_urls.keys():
+        for element in download_urls:
+            (key, url, size) = element
             path = os.path.join(location, key)
             if os.path.exists(path):
                 raise Exception("[%s]: A file already exists at this location, "
                                 "cannot proceed with download." % path)
             percentage = 0
+            print "downloading %s [%sMB]" % (path, size)
             print "0%"
-            req = urllib.urlopen(download_urls[key])
+            req = urllib.urlopen(url)
             with open(path, 'wb') as file_handle:
                 while True:
                     new_percentage = int((float(downloaded)/
@@ -173,7 +175,7 @@ class GogConnection:
                     downloaded += chunk
                     file_handle.write(data)
                 print "[%s]: %d KB written" % (path, (downloaded/1024))
-        entry_path = installers[0]["path"]
+        entry_path = download_urls()[0]
         entry_path = self.__obtain_installer_name(entry_path)
         return os.path.join(location, entry_path)
 

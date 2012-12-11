@@ -138,21 +138,21 @@ class GogConnection:
             installer_size = installer_data["size_mb"].replace(',','.')
             downloader = "%s/%s/%s/" % (self.game_installer,
                                         gameid, installer_id)
-            resp, content = client.request(downloader)
-            self.__check_status(resp)
-            download_url = json.loads(content)["file"]["link"]
-            download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
             local_path = installer_data["path"]
             # Remove the part that is not relevant to the filename
             local_path = self.__obtain_installer_name(local_path)
-            download_urls.append((local_path, download_url, installer_size))
+            download_urls.append((local_path, downloader, installer_size))
             total_size += float(installer_size)
 
         chunk = 512*1024 # 512KB each chunk
-        print "Need to obtain %sMB of data" % total_size
+        print "Need to obtain at total of %sMB of data" % total_size
         for element in download_urls:
-            downloaded = 0
             (key, url, size) = element
+            resp, content = client.request(url)
+            self.__check_status(resp)
+            download_url = json.loads(content)["file"]["link"]
+            download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
+            downloaded = 0
             size_in_kb = float(size)*1024
             path = os.path.join(location, key)
             if os.path.exists(path):
@@ -161,7 +161,7 @@ class GogConnection:
             percentage = 0
             print "downloading %s [%sMB]" % (path, size)
             print "0%"
-            req = urllib.urlopen(url)
+            req = urllib.urlopen(download_url)
             with open(path, 'wb') as file_handle:
                 while True:
                     new_percentage = int((float(downloaded)/

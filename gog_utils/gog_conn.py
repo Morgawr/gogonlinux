@@ -113,7 +113,7 @@ class GogConnection:
         self.__check_status(resp)
         return content
 
-    def __obtain_installer_name(installer):
+    def __obtain_installer_name(self, installer):
         """ 
         Return the name of the setup.exe file without the game name and id
         path added before it.
@@ -144,7 +144,7 @@ class GogConnection:
             download_url = download_url[:download_url.find('&fileExtForIe=.exe')]
             local_path = installer_data["path"]
             # Remove the part that is not relevant to the filename
-            local_path = __obtain_installer_name(local_path)
+            local_path = self.__obtain_installer_name(local_path)
             download_urls[local_path] = download_url
             total_size += float(installer_size)
 
@@ -174,6 +174,6 @@ class GogConnection:
                     file_handle.write(data)
                 print "[%s]: %d KB written" % (path, (downloaded/1024))
         entry_path = installers[0]["path"]
-        entry_path = __obtain_installer_name(entry_path)
+        entry_path = self.__obtain_installer_name(entry_path)
         return os.path.join(location, entry_path)
 

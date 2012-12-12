@@ -187,7 +187,16 @@ def do_install(game_id, database, setupfile, token, secret, beta):
                     "at %s " % database.games[game_id].install_path)
     if path == "":
         path = os.path.join(settings.data["install_path"], game_id)
-    
+
+    # Check if the game is supported by the gogonlinux project
+    if not beta:
+        data = site_conn.obtain_available_games()
+    else:
+        data = site_conn.obtain_beta_available_games()
+    if game_id not in data:
+       raise Usage("Game is not currently supported by the gogonlinux "
+                   "project.")
+    game_data = data[game_id]
     if setupfile == "":
         # We need to ask for username and password instead
         if token == "" or secret == "": 
@@ -220,7 +229,6 @@ def do_install(game_id, database, setupfile, token, secret, beta):
     else:
         deletesetup = False
         setup = setupfile
-
     print "Extracting data..."
     signal.signal(signal.SIGINT, handle_install_interrupt)
     os.makedirs(path)
@@ -243,11 +251,6 @@ def do_install(game_id, database, setupfile, token, secret, beta):
     # Now we need to update the local database and
     # download the install/uninstall scripts
     db_entry = game_id
-    if not beta:
-        data = site_conn.obtain_available_games()
-    else:
-        data = site_conn.obtain_beta_available_games()
-    game_data = data[game_id]
     game = gog_db.GameRecord(game_data["title"], game_data)
     # Let's download the install/uninstall scripts
     print "Retrieving game scripts from remote server..."

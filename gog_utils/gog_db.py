@@ -12,7 +12,7 @@ import hashlib
 
 import gog_utils.gog_filelock as FileLock
 
-FILELOCK_PATH = os.path.join("/var", "lock", getpass.getuser())
+FILELOCK_PATH = os.path.join("/tmp", "lock", getpass.getuser())
 
 class GogDatabase:
     """ Class representing the game database. """

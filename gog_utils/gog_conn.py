@@ -9,6 +9,7 @@ import sys
 import urllib
 import json
 import os
+import certifi
 
 
 class GogConnection:
@@ -39,11 +40,20 @@ class GogConnection:
         Return a dictionary with the required methods for interacting with
         gog.com and their respective URLs.
         """
-        res = requests.get(self.url_base+self.protocol)
+        res = requests.get(self.url_base+self.protocol, verify=False)
         if res.status_code != 200:
             raise Exception("Could not connect to the gog.com API.")
         return json.loads(res.text)["config"] # I should just use res.json maybe
 
+    def __obtain_client(self, consumer, token=None):
+        """
+        Return an oauth client with the given parameters making sure
+        the certificate authorities (taken from certifi) are valid
+        so the gog connection doesn't fail.
+        """
+        client = oauth.Client(consumer, token)
+        client.ca_certs = certifi.where()
+        return client
 
 
     #returns true only if resp status is 200 else it raises an exception
@@ -64,7 +74,7 @@ class GogConnection:
 
     def connect(self, username, password):
         """ Connect to gog.com using the defined username and password. """
-        client = oauth.Client(self.consumer)
+        client = self.__obtain_client(self.consumer)
         #resp, content = client.request(self.url_base+self.temp_token, "GET")
         resp, content = client.request(self.temp_token, "GET")
         self.__check_status(resp)
@@ -72,7 +82,7 @@ class GogConnection:
         temp_secret = request_token['oauth_token_secret']
         temp_token = request_token['oauth_token']
         token = oauth.Token(temp_token, temp_secret)
-        auth_client = oauth.Client(self.consumer, token)
+        auth_client = self.__obtain_client(self.consumer, token)
         print "Authenticating..."
         enc_url = urllib.urlencode({ 'password' : password, 
                                      'username' : username })
@@ -84,7 +94,7 @@ class GogConnection:
         self.__check_status(resp, error_message)
         oauth_verifier = dict(urlparse.parse_qsl(content))['oauth_verifier']
         token.set_verifier(oauth_verifier)
-        client = oauth.Client(self.consumer, token)
+        client = self.__obtain_client(self.consumer, token)
         enc_url = urllib.urlencode({ 'oauth_verifier' : oauth_verifier })
         token_url = "%s/?%s" % (self.get_token, enc_url)
         resp, content = client.request(token_url)
@@ -96,7 +106,7 @@ class GogConnection:
         self.set_auth_token(final_token, final_secret)
 
         self.auth_token = oauth.Token(final_token, final_secret)
-        client = oauth.Client(self.consumer, self.auth_token)
+        client = self.__obtain_client(self.consumer, self.auth_token)
         print "Success"
 
     def set_auth_token(self, token, secret):
@@ -108,7 +118,7 @@ class GogConnection:
         if not ('auth_token' in dir(self)):
             raise Exception("Not logged in correctly.")
         
-        client = oauth.Client(self.consumer, self.auth_token)
+        client = self.__obtain_client(self.consumer, self.auth_token)
         resp, content = client.request(self.user_url)
         self.__check_status(resp)
         return content
@@ -126,7 +136,7 @@ class GogConnection:
         from gog.com to the specified location. 
         """
         # this should work most of the time but I am not 100% sure 
-        client = oauth.Client(self.consumer, self.auth_token)
+        client = self.__obtain_client(self.consumer, self.auth_token)
         resp, content = client.request(self.game_details+gameid)
         self.__check_status(resp)
         installers = json.loads(content)["game"]["win_installer"]

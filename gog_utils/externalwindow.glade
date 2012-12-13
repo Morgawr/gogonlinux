@@ -53,8 +53,8 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_action_appearance">False</property>
-            <signal name="activate" handler="on_action_activated" swapped="no"/>
-            <signal name="clicked" handler="on_action_activated" swapped="no"/>
+            <signal name="activate" handler="on_action_activated" />
+            <signal name="clicked" handler="on_action_activated" />
           </widget>
           <packing>
             <property name="x">350</property>

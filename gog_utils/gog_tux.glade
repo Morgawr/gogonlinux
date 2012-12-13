@@ -9,8 +9,8 @@
     <property name="resizable">False</property>
     <property name="default_width">600</property>
     <property name="default_height">600</property>
-    <signal name="destroy" handler="on_gog_tux_destroy" swapped="no"/>
-    <signal name="key_press_event" handler="on_gog_tux_key_pressed" swapped="no"/>
+    <signal name="destroy" handler="on_gog_tux_destroy" />
+    <signal name="key_press_event" handler="on_gog_tux_key_pressed" />
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -37,7 +37,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Check for updates</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="updatemenu_activated" swapped="no"/>
+                        <signal name="activate" handler="updatemenu_activated" />
                       </widget>
                     </child>
                     <child>
@@ -47,7 +47,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Log in</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_loginmenu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_loginmenu_activated" />
                       </widget>
                     </child>
                     <child>
@@ -57,7 +57,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Log out</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_logoutmenu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_logoutmenu_activated" />
                       </widget>
                     </child>
                     <child>
@@ -68,7 +68,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_close_menu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_close_menu_activated" />
                       </widget>
                     </child>
                   </widget>
@@ -94,7 +94,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_about_menu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_about_menu_activated" />
                       </widget>
                     </child>
                   </widget>
@@ -352,8 +352,8 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <signal name="activate" handler="on_saveprefsbutton_activated" swapped="no"/>
-                        <signal name="clicked" handler="on_saveprefsbutton_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_saveprefsbutton_activated" />
+                        <signal name="clicked" handler="on_saveprefsbutton_clicked" />
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -369,8 +369,8 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <signal name="activate" handler="on_undoprefsbutton_activated" swapped="no"/>
-                        <signal name="clicked" handler="on_undoprefsbutton_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_undoprefsbutton_activated" />
+                        <signal name="clicked" handler="on_undoprefsbutton_clicked" />
                       </widget>
                       <packing>
                         <property name="top_attach">10</property>
@@ -609,7 +609,7 @@ window in wine games</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="betasoftwarecheck">
-                        <property name="label" translatable="yes">Access beta</property>
+                        <property name="label" translatable="yes">Access unstable games</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -627,10 +627,9 @@ window in wine games</property>
                       <widget class="GtkLabel" id="label17">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip" translatable="yes">Enabling the beta version of compatibility games could make
-said games unstable. Used for testing purposes only.
+                        <property name="tooltip" translatable="yes">Enabling the unstable version for games could make some games unplayable. Used for testing purposes only.
 (REQUIRES PROGRAM RESTART)</property>
-                        <property name="label" translatable="yes">Enable beta version of games:</property>
+                        <property name="label" translatable="yes">Enable unstable version of games:</property>
                       </widget>
                       <packing>
                         <property name="top_attach">9</property>
@@ -729,8 +728,8 @@ said games unstable. Used for testing purposes only.
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_launchbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_launchbutton_activated" swapped="no"/>
+                    <signal name="activate" handler="on_launchbutton_activated" />
+                    <signal name="clicked" handler="on_launchbutton_activated" />
                   </widget>
                   <packing>
                     <property name="x">150</property>
@@ -746,8 +745,8 @@ said games unstable. Used for testing purposes only.
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_uninstallbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_uninstallbutton_activated" swapped="no"/>
+                    <signal name="activate" handler="on_uninstallbutton_activated" />
+                    <signal name="clicked" handler="on_uninstallbutton_activated" />
                   </widget>
                   <packing>
                     <property name="x">275</property>
@@ -802,8 +801,8 @@ said games unstable. Used for testing purposes only.
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_installbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_installbutton_activated" swapped="no"/>
+                    <signal name="activate" handler="on_installbutton_activated" />
+                    <signal name="clicked" handler="on_installbutton_activated" />
                   </widget>
                   <packing>
                     <property name="x">25</property>

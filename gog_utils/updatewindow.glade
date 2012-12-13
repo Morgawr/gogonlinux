@@ -35,8 +35,8 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="activate" handler="on_cancelbutton_activated" swapped="no"/>
-                <signal name="clicked" handler="on_cancelbutton_activated" swapped="no"/>
+                <signal name="activate" handler="on_cancelbutton_activated" />
+                <signal name="clicked" handler="on_cancelbutton_activated" />
               </widget>
               <packing>
                 <property name="expand">True</property>
@@ -52,8 +52,8 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
-                <signal name="activate" handler="on_okbutton_activated" swapped="no"/>
-                <signal name="clicked" handler="on_okbutton_activated" swapped="no"/>
+                <signal name="activate" handler="on_okbutton_activated" />
+                <signal name="clicked" handler="on_okbutton_activated" />
               </widget>
               <packing>
                 <property name="expand">True</property>

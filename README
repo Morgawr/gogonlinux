@@ -33,15 +33,15 @@ REQUIRED LIBRARIES:
 
 To run this software the following python libraries are required:
 
-- python-glade2 
-- python-oauth2 (notice the 2, it's important)
-- python-requests
+- glade2
+- oauth2 (notice the 2, it's important)
+- requests
+- certifi
 
-(names are based on debian/ubuntu repository naming and may vary depending
-on your own distro's package manager)
-
-NOTE: on (x)ubuntu 12.04 the python-requests-package is incompatible with
-gogonlinux, it's recommended you use pip to install the requests-package.
+The best way to install them is using the pip program, it handles dependencies
+of python libraries and installs them for you directly.
+Using a specific distro's package manager sometimes can result in broken
+libraries that may make the software run differently than intended.
 -------------------------------------------------------------------------------
 
 REQUIRED EXTERNAL SOFTWARE:
@@ -55,6 +55,7 @@ install and run the games, so please install them before you run the gog client.
 - dosbox (http://www.dosbox.com/) is required for most old dos videogames
 - innoextract (http://constexpr.org/innoextract/) is required to extract and
 	setup the .exe installers downloaded from gog.com
+- zenity is required for some installation and launcher scripts for games
 
 For an ease of use, please download the aforementioned programs from your 
 distribution's package manager (i.e. apt-get for ubuntu). 

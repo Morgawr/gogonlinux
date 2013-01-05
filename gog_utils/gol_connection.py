@@ -31,18 +31,17 @@ def generate_dummy_data(game_id):
     any existing repository.
     """
     data = {}
-    data[game_id] = {}
-    data[game_id]["install_script"] = "404"
-    data[game_id]["launch_script"] = "404"
-    data[game_id]["uninstall_script"] = "404"
-    data[game_id]["online_id"] = game_id
-    data[game_id]["full_name"] = game_id
-    data[game_id]["released"] = '1'
-    data[game_id]["emulation"] = "unknown"
-    data[game_id]["cover_url"] = "http://gogonlinux.com/images/empty_cover.jpg"
-    data[game_id]["compat"] = "red"
-    data[game_id]["private_repository"] = '1'
-    data[game_id]["repository_url"] = "forced"
+    data["install_script"] = "404"
+    data["launch_script"] = "404"
+    data["uninstall_script"] = "404"
+    data["online_id"] = game_id
+    data["title"] = game_id
+    data["released"] = '1'
+    data["emulation"] = "unknown"
+    data["cover_url"] = "http://gogonlinux.com/images/empty_cover.jpg"
+    data["compat"] = "red"
+    data["private_repository"] = '1'
+    data["repository_url"] = "forced"
     return json.loads(json.dumps(data))
 
 

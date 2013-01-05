@@ -155,7 +155,7 @@ class GogConnection:
             total_size += float(installer_size)
 
         chunk = 512*1024 # 512KB each chunk
-        print "Need to obtain at total of %sMB of data" % total_size
+        print "Need to obtain a total of %sMB of data" % total_size
         for element in download_urls:
             (key, url, size) = element
             resp, content = client.request(url)

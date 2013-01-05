@@ -205,6 +205,7 @@ def do_install(game_id, database, settings):
         game_data = site_conn.generate_dummy_data(game_id)
     else:
         game_data = data[game_id]
+    signal.signal(signal.SIGINT, handle_install_interrupt)
     if "setup_file" not in settings.keys() or settings["setup_file"] == "":
         # We need to ask for username and password instead
         if (("token" not in settings.keys() or settings["token"] == "") and
@@ -227,7 +228,6 @@ def do_install(game_id, database, settings):
         else:
             conn.set_auth_token(token, secret)
         print "Retrieving installer..."
-        signal.signal(signal.SIGINT, handle_install_interrupt)
         deletesetup = True
         try:
             setup = conn.download_game(game_id, tempfile.gettempdir())
@@ -239,9 +239,13 @@ def do_install(game_id, database, settings):
             raise err
     else:
         deletesetup = False
+        # let's create path for setup file
         setup = settings["setup_file"]
+        if setup[0] != "/":
+            setup = os.path.join(os.getcwd(),setup)
+        if not os.path.exists(setup):
+            raise Usage("The file %s does not exist." % setup)
     print "Extracting data..."
-    signal.signal(signal.SIGINT, handle_install_interrupt)
     os.makedirs(path)
     command = "cd %s && innoextract -q %s" % (path, setup)
     #let's extract the file

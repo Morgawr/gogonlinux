@@ -16,6 +16,7 @@ import threading
 import urllib2
 import subprocess
 import signal
+import json
 
 import gog_utils.gog_db as gog_db
 import gog_utils.gog_settings as gog_settings
@@ -198,7 +199,14 @@ class GogTuxGUI:
             self.rightpanel.show()
             items, paths = data.get_selection().get_selected_rows()
             element = items.get_iter(paths[0])
-            game = self.game_data[items.get_value(element, 3)]
+            if data == self.availablegamestree:
+                game = self.game_data[items.get_value(element, 3)]
+            else:
+                # XXX: This should be refactored to be more pleasant
+                game = self.database.games[items.get_value(element, 3)]
+                game = gog_db.GameRecord.serialize(game)
+                game["title"] = game["full_name"] # for compatibility
+                game = json.loads(json.dumps(game))
             self.show_game_card(game, items.get_value(element, 3))
         else:
             self.rightpanel.hide()
@@ -297,6 +305,8 @@ class GogTuxGUI:
             self.uninstallbutton.set_sensitive(True)
             self.installbutton.set_sensitive(False)
             self.launchbutton.set_sensitive(True)
+            if self.database.games[game_id].launch_script == "404":
+                self.launchbutton.set_sensitive(False)
             self.gameinstalledlabel.set_text(found_game.install_path)
         else:
             self.uninstallbutton.set_sensitive(False)

@@ -25,6 +25,27 @@ def obtain_beta_available_games():
     resp = requests.get(url=(WEBSITE_URL + BETA_GAMES))
     return json.loads(resp.text) #pylint: disable=E1103
 
+def generate_dummy_data(game_id):
+    """
+    Create fake JSON data for games that aren't yet supported by 
+    any existing repository.
+    """
+    data = {}
+    data[game_id] = {}
+    data[game_id]["install_script"] = "404"
+    data[game_id]["launch_script"] = "404"
+    data[game_id]["uninstall_script"] = "404"
+    data[game_id]["online_id"] = game_id
+    data[game_id]["full_name"] = game_id
+    data[game_id]["released"] = '1'
+    data[game_id]["emulation"] = "unknown"
+    data[game_id]["cover_url"] = "http://gogonlinux.com/images/empty_cover.jpg"
+    data[game_id]["compat"] = "red"
+    data[game_id]["private_repository"] = '1'
+    data[game_id]["repository_url"] = "forced"
+    return json.loads(json.dumps(data))
+
+
 def download_script(target, url):
     """ 
     Download a script from the gogonlinux url

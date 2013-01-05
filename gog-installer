@@ -100,19 +100,13 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hur", 
+            opts, args = getopt.getopt(argv[1:], "hufr", 
                                        ["help","token=","secret=","uninstall",
                                         "run","install-path=","setup=","beta",
-                                        "version","list","available"])
+                                        "version","list","available","force"])
         except getopt.error, msg:
             raise Usage(msg)
-        token = ""
-        secret = ""
-        setupfile = ""
-        beta = False
-        show_list = False
-        show_avail = False
-        global path
+        settings = {}
         global setup
         global db_entry
         
@@ -125,31 +119,33 @@ def main(argv=None):
                 print_usage()
                 return 0
             elif o == "--token":
-                token = a
+                settings["token"] = a
             elif o == "--secret":
-                secret = a
+                settings["secret"] = a
             elif o == "--install-path":
-                path = a
+                settings["install_path"] = a
             elif o in ("-u", "--uninstall"):
                 operation = 1
             elif o in ("-r", "--run"):
                 operation = 2
             elif o in ("--setup"):
-                setupfile = a
+                settings["setup_file"] = a
             elif o in ("--beta"):
-                beta = True
+                settings["beta"] = True
             elif o in ("--version"):
                 show_version()
                 return
             elif o in ("--list"):
-                show_list = True
+                settings["show_list"] = True
             elif o in ("--available"):
-                show_avail = True
-        if show_list:
+                settings["show_avail"] = True
+            elif o in ("--force", "-f"):
+                settings["force"] = True
+        if "show_list" in settings.keys() and settings["show_list"] == True:
             print_list()
             return
-        if show_avail: 
-            print_avail(beta)
+        if "show_avail" in settings.keys() and settings["show_avail"] == True:
+            print_avail(settings)
             return
         if len(args) == 0:
             raise Usage("Wrong number of arguments, you need at least "
@@ -160,7 +156,7 @@ def main(argv=None):
         database = gog_db.GogDatabase(database_path)
         database.update()
         if operation == 0:
-            do_install(game_id, database, setupfile, token, secret, beta)
+            do_install(game_id, database, settings)
         else:
             if not database.has_game(game_id):
                 raise Usage("Game is not installed in the current database")
@@ -175,35 +171,50 @@ def main(argv=None):
         return 2
     return 0
 
-def do_install(game_id, database, setupfile, token, secret, beta):
+def do_install(game_id, database, settings):
     """ Execute the install process given the game's id. """
     global path
     global setup
     global db_entry
     global deletesetup
-    settings = gog_settings.GogSettings(general_path)
+    config = gog_settings.GogSettings(general_path)
     if database.has_game(game_id):
         raise Usage("Game is already installed in the database "
                     "at %s " % database.games[game_id].install_path)
-    if path == "":
-        path = os.path.join(settings.data["install_path"], game_id)
-
+    if "install_path" in settings.keys():
+        path = settings["install_path"]
+    else:
+        path = os.path.join(config.data["install_path"], game_id)
     # Check if the game is supported by the gogonlinux project
+    if "beta" in settings.keys():
+        beta = settings["beta"]
+    else:
+        beta = False
+    if "force" in settings.keys():
+        force = settings["force"]
+    else:
+        force = False
     if not beta:
         data = site_conn.obtain_available_games()
     else:
         data = site_conn.obtain_beta_available_games()
     if game_id not in data:
-       raise Usage("Game is not currently supported by the gogonlinux "
-                   "project.")
-    game_data = data[game_id]
-    if setupfile == "":
+        if not force:
+           raise Usage("Game is not currently supported by the gogonlinux "
+                       "project.")
+        game_data = site_conn.generate_dummy_data(game_id)
+    else:
+        game_data = data[game_id]
+    if "setup_file" not in settings.keys() or settings["setup_file"] == "":
         # We need to ask for username and password instead
-        if token == "" or secret == "": 
+        if (("token" not in settings.keys() or settings["token"] == "") and
+           ("secret" not in settings.keys() or settings["secret"] == "")):
             email = raw_input("gog.com email address: ")
             password = getpass.getpass()
             is_user = True
         else:
+            token = settings["token"]
+            secret = settings["secret"]
             is_user = False
         conn = gog_conn.GogConnection()
         if is_user:
@@ -228,7 +239,7 @@ def do_install(game_id, database, setupfile, token, secret, beta):
             raise err
     else:
         deletesetup = False
-        setup = setupfile
+        setup = settings["setup_file"]
     print "Extracting data..."
     signal.signal(signal.SIGINT, handle_install_interrupt)
     os.makedirs(path)
@@ -312,6 +323,10 @@ def do_uninstall(game_id, database):
 def do_launch(game_id, database):
     """ Launch a game from the installed games local database. """
     game = database.games[game_id]
+    if game.private == '1' and game.repo_url == "forced":
+        print ("Game comes from a forced install, unable to launch it "
+              "automatically.")
+        return
     startup = os.path.join(game.install_path,"startgame.sh")
     subprocess.Popen([startup])       
 
@@ -326,12 +341,16 @@ def print_list():
         print "Install Path: %s" % database.games[k].install_path
     print " ----------- "
 
-def print_avail(beta):
+def print_avail(settings):
     """ Print a list of all the available games on gogonlinux.com. """
-    if not beta:
-        data = site_conn.obtain_available_games()
+    if "beta" in settings.keys() and settings["beta"] == True:
+        beta = True
     else:
+        beta = False
+    if beta: 
         data = site_conn.obtain_beta_available_games()
+    else:
+        data = site_conn.obtain_available_games()
     for k in data.keys():
         print " ----------- "
         print "Game ID: %s" % k

@@ -26,12 +26,16 @@ The path of the already downloaded setup.exe file if you do not want to
 download one from gog.com.
 .TP
 .B --beta
-This enables support for beta (not yet officially released) gogonlinux games
+This enables support for beta (not yet officially released) gogonlinux games.
 .TP
 .B --force
 This forces the installer to use dummy game data (no installer/launcher) in 
 order to install the game if the game is not supported by the official
-repository
+repository.
+.TP
+.B -p, --private-repo=<repository>
+This instructs the intaller to look for a different game repository and not use
+the official one.
 .SH COMMANDS
 .TP 5
 .B -h, --help

@@ -12,9 +12,18 @@ WEBSITE_URL = "http://www.gogonlinux.com"
 AVAILABLE_GAMES = "/available"
 BETA_GAMES = "/available-beta"
 
-def obtain_available_games():
-    """ Return JSON list of all available games. """
-    resp = requests.get(url=(WEBSITE_URL + AVAILABLE_GAMES))
+def obtain_available_games(beta, repo=None):
+    """ 
+    Return JSON list of all available games. If no repo is specified
+    then return the official one. Beta status only works for official repo.
+    """
+    if repo is not None:
+        site = repo
+    elif beta:
+        site = "%s%s" % (WEBSITE_URL, BETA_GAMES)
+    else:
+        site = "%s%s" % (WEBSITE_URL, AVAILABLE_GAMES)
+    resp = requests.get(url=site)
     return json.loads(resp.text) #pylint: disable=E1103
 
 def obtain_beta_available_games():

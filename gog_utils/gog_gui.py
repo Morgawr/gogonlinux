@@ -506,9 +506,10 @@ class GogTuxGUI:
         and then call function to load local game list.
         """
         if self.have_beta_access == "True":
-            self.game_data = site_conn.obtain_beta_available_games()
+            beta = True
         else:
-            self.game_data = site_conn.obtain_available_games()
+            beta = False
+        self.game_data = site_conn.obtain_available_games(beta)
         for name, content in self.game_data.items():
             if content["released"] == '0':
                 image = self.beta

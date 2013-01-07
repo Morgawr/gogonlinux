@@ -100,10 +100,11 @@ def main(argv=None):
         argv = sys.argv
     try:
         try: 
-            opts, args = getopt.getopt(argv[1:], "hufr", 
+            opts, args = getopt.getopt(argv[1:], "hufrp", 
                                        ["help","token=","secret=","uninstall",
                                         "run","install-path=","setup=","beta",
-                                        "version","list","available","force"])
+                                        "version","list","available","force",
+                                        "private-repo="])
         except getopt.error, msg:
             raise Usage(msg)
         settings = {}
@@ -141,6 +142,8 @@ def main(argv=None):
                 settings["show_avail"] = True
             elif o in ("--force", "-f"):
                 settings["force"] = True
+            elif o in ("--private-repo", "-p"):
+                settings["repository"] = a
         if "show_list" in settings.keys() and settings["show_list"] == True:
             print_list()
             return
@@ -194,10 +197,11 @@ def do_install(game_id, database, settings):
         force = settings["force"]
     else:
         force = False
-    if not beta:
-        data = site_conn.obtain_available_games()
+    if "repository" in settings.keys():
+        repo = settings["repository"]
     else:
-        data = site_conn.obtain_beta_available_games()
+        repo = None
+    data = site_conn.obtain_available_games(beta, repo)
     if game_id not in data:
         if not force:
            raise Usage("Game is not currently supported by the gogonlinux "
@@ -351,10 +355,7 @@ def print_avail(settings):
         beta = True
     else:
         beta = False
-    if beta: 
-        data = site_conn.obtain_beta_available_games()
-    else:
-        data = site_conn.obtain_available_games()
+    data = site_conn.obtain_available_games(beta)
     for k in data.keys():
         print " ----------- "
         print "Game ID: %s" % k

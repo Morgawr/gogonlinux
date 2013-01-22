@@ -1,4 +1,6 @@
 #!/usr/bin/make -f
+# -*- makefile -*-
+export PREFIX=/usr
 
 %:
 	dh $@

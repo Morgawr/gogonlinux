@@ -142,7 +142,7 @@ def main(argv=None):
                 settings["show_avail"] = True
             elif o in ("--force", "-f"):
                 settings["force"] = True
-            elif o in ("--private-repo", "-p"):
+            elif o in ("--private-repo"):
                 settings["repository"] = a
         if "show_list" in settings.keys() and settings["show_list"] == True:
             print_list()

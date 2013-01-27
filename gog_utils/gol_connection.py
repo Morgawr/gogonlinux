@@ -23,16 +23,17 @@ def obtain_available_games(beta, repo=None):
         site = "%s%s" % (WEBSITE_URL, BETA_GAMES)
     else:
         site = "%s%s" % (WEBSITE_URL, AVAILABLE_GAMES)
-    resp = requests.get(url=site)
-    return json.loads(resp.text) #pylint: disable=E1103
-
-def obtain_beta_available_games():
-    """
-    Obtain JSON list of all available games, even 
-    the ones flagged as beta/unreleased
-    """
-    resp = requests.get(url=(WEBSITE_URL + BETA_GAMES))
-    return json.loads(resp.text) #pylint: disable=E1103
+    if (site.startswith("http://") or site.startswith("https://") or
+        site.startswith("www.")):
+        resp = requests.get(url=site)
+        if resp.status_code != 200:
+            raise Exception("The game repository could not be found")
+        return json.loads(resp.text)
+    path = os.path.join(os.getcwd(),site)
+    if not os.path.isfile(path):
+        raise Exception("The local game repository could not be found")
+    with  open(path) as localfile:
+        return json.loads(localfile.read()) #pylint: disable=E1103
 
 def generate_dummy_data(game_id):
     """
@@ -52,7 +53,6 @@ def generate_dummy_data(game_id):
     data["private_repository"] = '1'
     data["repository_url"] = "forced"
     return json.loads(json.dumps(data))
-
 
 def download_script(target, url):
     """ 

@@ -300,7 +300,7 @@ class GogTuxGUI:
         If the game is currently installed, then it lets the user uninstall or
         launch it, else it lets the user install/download it.
         """
-        if game_id in self.database.games.keys():
+        if game_id in self.database.games:
             found_game = self.database.games[game_id]
             self.uninstallbutton.set_sensitive(True)
             self.installbutton.set_sensitive(False)
@@ -349,10 +349,10 @@ class GogTuxGUI:
     def do_logout(self, widget):
         """ Disconnect the user and remove all the cookies from the pc. """
         settings_changed = False
-        if "token" in self.settings.data.keys():
+        if "token" in self.settings.data:
             settings_changed = True
             del(self.settings.data["token"])
-        if "secret" in self.settings.data.keys():
+        if "secret" in self.settings.data:
             settings_changed = True
             del(self.settings.data["key"])
         self.islogged = False
@@ -759,7 +759,7 @@ class UpdateWindow:
         self.selected.set_sort_column_id(0, gtk.SORT_ASCENDING)
         updatelisttree.set_model(self.selected)
         togglerenderer.connect("toggled", self.__toggled, updatelisttree)
-        for item in self.games.keys():
+        for item in self.games:
             if (self.games[item].private == '1'):
                 continue # We don't support updates for private repos yet
             self.selected.append((self.games[item].full_name, False,

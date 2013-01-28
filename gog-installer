@@ -144,10 +144,10 @@ def main(argv=None):
                 settings["force"] = True
             elif o in ("--private-repo"):
                 settings["repository"] = a
-        if "show_list" in settings.keys() and settings["show_list"] == True:
+        if "show_list" in settings and settings["show_list"] == True:
             print_list()
             return
-        if "show_avail" in settings.keys() and settings["show_avail"] == True:
+        if "show_avail" in settings and settings["show_avail"] == True:
             print_avail(settings)
             return
         if len(args) == 0:
@@ -184,20 +184,20 @@ def do_install(game_id, database, settings):
     if database.has_game(game_id):
         raise Usage("Game is already installed in the database "
                     "at %s " % database.games[game_id].install_path)
-    if "install_path" in settings.keys():
+    if "install_path" in settings:
         path = settings["install_path"]
     else:
         path = os.path.join(config.data["install_path"], game_id)
     # Check if the game is supported by the gogonlinux project
-    if "beta" in settings.keys():
+    if "beta" in settings:
         beta = settings["beta"]
     else:
         beta = False
-    if "force" in settings.keys():
+    if "force" in settings:
         force = settings["force"]
     else:
         force = False
-    if "repository" in settings.keys():
+    if "repository" in settings:
         repo = settings["repository"]
     else:
         repo = None
@@ -213,10 +213,10 @@ def do_install(game_id, database, settings):
             game_data["private_repository"] = '1'
             game_data["repository_url"] = repo
     signal.signal(signal.SIGINT, handle_install_interrupt)
-    if "setup_file" not in settings.keys() or settings["setup_file"] == "":
+    if "setup_file" not in settings or settings["setup_file"] == "":
         # We need to ask for username and password instead
-        if (("token" not in settings.keys() or settings["token"] == "") and
-           ("secret" not in settings.keys() or settings["secret"] == "")):
+        if (("token" not in settings or settings["token"] == "") and
+           ("secret" not in settings or settings["secret"] == "")):
             email = raw_input("gog.com email address: ")
             password = getpass.getpass()
             is_user = True
@@ -345,7 +345,7 @@ def print_list():
     """ Print a list with all the installed games. """
     database = gog_db.GogDatabase(database_path)
     database.update()
-    for k in database.games.keys():
+    for k in database.games:
         print " ----------- "
         print "Game ID: %s" % k 
         print "Game Title: %s" % database.games[k].full_name
@@ -354,12 +354,12 @@ def print_list():
 
 def print_avail(settings):
     """ Print a list of all the available games on gogonlinux.com. """
-    if "beta" in settings.keys() and settings["beta"] == True:
+    if "beta" in settings and settings["beta"] == True:
         beta = True
     else:
         beta = False
     data = site_conn.obtain_available_games(beta)
-    for k in data.keys():
+    for k in data:
         print " ----------- "
         print "Game ID: %s" % k
         print "Game Title: %s" % data[k]["title"]

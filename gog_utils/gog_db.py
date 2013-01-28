@@ -64,7 +64,7 @@ class GogDatabase:
         This basically means whether the game is
         installed or not
         """
-        if name in self.games.keys():
+        if name in self.games:
             return True
         return False
 
@@ -89,22 +89,22 @@ class GameRecord(json.JSONEncoder):
     def __init__(self, name, data=None):
         self.full_name = name
         if data != None:
-            if "install_path" in data.keys():
+            if "install_path" in data:
                 self.install_path = data["install_path"]
             self.install_script = data["install_script"]
             self.launch_script = data["launch_script"]
             self.uninstall_script = data["uninstall_script"]
-            if "install_script_file" in data.keys():
+            if "install_script_file" in data:
                 self.install_script_file = data["install_script_file"]
-            if "uninstall_script_file" in data.keys():
+            if "uninstall_script_file" in data:
                 self.uninstall_script_file = data["uninstall_script_file"]
-            if "online_id" in data.keys():
+            if "online_id" in data:
                 self.online_id = data["online_id"]
-            if "full_name" in data.keys():
+            if "full_name" in data:
                 self.full_name = data["full_name"]
-            if "released" in data.keys():
+            if "released" in data:
                 self.released = data["released"]
-            if "private_repository" in data.keys():
+            if "private_repository" in data:
                 self.private = data["private_repository"]
                 self.repo_url = data["repository_url"]
             self.emulation = data["emulation"]

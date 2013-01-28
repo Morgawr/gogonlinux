@@ -209,6 +209,9 @@ def do_install(game_id, database, settings):
         game_data = site_conn.generate_dummy_data(game_id)
     else:
         game_data = data[game_id]
+        if repo is not None:
+            game_data["private_repository"] = '1'
+            game_data["repository_url"] = repo
     signal.signal(signal.SIGINT, handle_install_interrupt)
     if "setup_file" not in settings.keys() or settings["setup_file"] == "":
         # We need to ask for username and password instead

@@ -12,6 +12,24 @@ WEBSITE_URL = "http://www.gogonlinux.com"
 AVAILABLE_GAMES = "/available"
 BETA_GAMES = "/available-beta"
 
+def get_data_from_resource(location):
+    """
+    Return the data from a specific resource. It can be a locally stored 
+    file or an internet url.
+    """
+    if (location.startswith("http://") or location.startswith("https://") or
+        location.startswith("www.")):
+        resp = requests.get(url=location)
+        if resp.status_code != 200:
+            raise Exception("The game repository could not be found")
+        return resp.content
+    path = os.path.join(os.getcwd(),location)
+    if not os.path.isfile(path):
+        raise Exception("The local game repository could not be found")
+    with  open(path) as localfile:
+        return localfile.read() #pylint: disable=E1103
+
+
 def obtain_available_games(beta, repo=None):
     """ 
     Return JSON list of all available games. If no repo is specified
@@ -23,17 +41,7 @@ def obtain_available_games(beta, repo=None):
         site = "%s%s" % (WEBSITE_URL, BETA_GAMES)
     else:
         site = "%s%s" % (WEBSITE_URL, AVAILABLE_GAMES)
-    if (site.startswith("http://") or site.startswith("https://") or
-        site.startswith("www.")):
-        resp = requests.get(url=site)
-        if resp.status_code != 200:
-            raise Exception("The game repository could not be found")
-        return json.loads(resp.text)
-    path = os.path.join(os.getcwd(),site)
-    if not os.path.isfile(path):
-        raise Exception("The local game repository could not be found")
-    with  open(path) as localfile:
-        return json.loads(localfile.read()) #pylint: disable=E1103
+    return json.loads(get_data_from_resource(site))
 
 def generate_dummy_data(game_id):
     """
@@ -68,6 +76,7 @@ def obtain_launch_md5_list():
     """
     Download the data from the md5 list of launcher scripts on gogonlinux to
     check if there are new updates for each individual game.
+    This currently does not work with private repositories.
     """
     try:
         resp = requests.get(url=(WEBSITE_URL + "/launcher_md5"))

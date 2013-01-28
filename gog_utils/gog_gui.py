@@ -760,9 +760,8 @@ class UpdateWindow:
         updatelisttree.set_model(self.selected)
         togglerenderer.connect("toggled", self.__toggled, updatelisttree)
         for item in self.games.keys():
-            if (self.games[item].private == '1' and 
-               self.games[item].repo_url == "forced"):
-                continue
+            if (self.games[item].private == '1'):
+                continue # We don't support updates for private repos yet
             self.selected.append((self.games[item].full_name, False,
                                   self.games[item].online_id))
 

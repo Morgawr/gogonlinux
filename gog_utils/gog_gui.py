@@ -58,7 +58,7 @@ class GogTuxGUI:
         self.connection = connection
         self.gladefile = os.path.join(PACKAGE_DIRECTORY,"gog_tux.glade")
         self.glade_tree = gtk.glade.XML(self.gladefile)
-        self.rightpanel = self.glade_tree.get_widget("fixed1")
+        self.rightpanel = self.glade_tree.get_widget("rightpanel")
         self.rightpanel.hide()
         if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
             os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
@@ -295,6 +295,15 @@ class GogTuxGUI:
             ExternalOutputWindow(self, self.selected_game, False, 
                                  beta=(self.have_beta_access == "True"))
 
+    def limit_string(self, string, size):
+        """
+        Limit the size of the string cutting it at the beginning with ...
+        """
+        if len(string) <= size:
+            return string
+        else:
+            return ".." + string[len(string)-size-2:]
+
     def show_game_card(self, game, game_id=None):
         """
         Function that displays the game card menu for the relative game.
@@ -308,8 +317,10 @@ class GogTuxGUI:
             self.launchbutton.set_sensitive(True)
             if self.database.games[game_id].launch_script == "404":
                 self.launchbutton.set_sensitive(False)
-            self.gameinstalledlabel.set_text(found_game.install_path)
-            self.gamerepositorylabel.set_text(found_game.repo_url)
+            install_path = self.limit_string(found_game.install_path, 30)
+            self.gameinstalledlabel.set_text(install_path)
+            game_repo = self.limit_string(found_game.repo_url, 30)
+            self.gamerepositorylabel.set_text(game_repo)
         else:
             self.uninstallbutton.set_sensitive(False)
             self.installbutton.set_sensitive(True)

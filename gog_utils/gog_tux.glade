@@ -9,8 +9,8 @@
     <property name="resizable">False</property>
     <property name="default_width">600</property>
     <property name="default_height">600</property>
-    <signal name="destroy" handler="on_gog_tux_destroy" swapped="no"/>
-    <signal name="key_press_event" handler="on_gog_tux_key_pressed" swapped="no"/>
+    <signal name="destroy" handler="on_gog_tux_destroy" />
+    <signal name="key_press_event" handler="on_gog_tux_key_pressed" />
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -37,7 +37,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Check for updates</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="updatemenu_activated" swapped="no"/>
+                        <signal name="activate" handler="updatemenu_activated" />
                       </widget>
                     </child>
                     <child>
@@ -47,7 +47,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Log in</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_loginmenu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_loginmenu_activated" />
                       </widget>
                     </child>
                     <child>
@@ -57,7 +57,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="label" translatable="yes">Log out</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_logoutmenu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_logoutmenu_activated" />
                       </widget>
                     </child>
                     <child>
@@ -68,7 +68,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_close_menu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_close_menu_activated" />
                       </widget>
                     </child>
                   </widget>
@@ -94,7 +94,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_about_menu_activated" swapped="no"/>
+                        <signal name="activate" handler="on_about_menu_activated" />
                       </widget>
                     </child>
                   </widget>
@@ -352,8 +352,8 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <signal name="activate" handler="on_saveprefsbutton_activated" swapped="no"/>
-                        <signal name="clicked" handler="on_saveprefsbutton_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_saveprefsbutton_activated" />
+                        <signal name="clicked" handler="on_saveprefsbutton_clicked" />
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -369,8 +369,8 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
-                        <signal name="activate" handler="on_undoprefsbutton_activated" swapped="no"/>
-                        <signal name="clicked" handler="on_undoprefsbutton_clicked" swapped="no"/>
+                        <signal name="activate" handler="on_undoprefsbutton_activated" />
+                        <signal name="clicked" handler="on_undoprefsbutton_clicked" />
                       </widget>
                       <packing>
                         <property name="top_attach">10</property>
@@ -657,100 +657,283 @@ window in wine games</property>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkFixed" id="fixed1">
+              <widget class="GtkVBox" id="rightpanel">
                 <property name="width_request">400</property>
                 <property name="height_request">600</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <widget class="GtkLabel" id="label3">
-                    <property name="width_request">50</property>
-                    <property name="height_request">20</property>
+                  <widget class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Name:</property>
+                    <child>
+                      <widget class="GtkTable" id="table1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="n_rows">6</property>
+                        <property name="n_columns">2</property>
+                        <property name="column_spacing">5</property>
+                        <property name="row_spacing">6</property>
+                        <child>
+                          <widget class="GtkFixed" id="fixed2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkFixed" id="fixed12">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label21">
+                            <property name="width_request">113</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Emulation Mode:</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">4</property>
+                            <property name="bottom_attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label18">
+                            <property name="width_request">50</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Name:</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkFixed" id="fixed16">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkFixed" id="fixed17">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="namelabel">
+                            <property name="width_request">300</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">undefined</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="emulationlabel">
+                            <property name="width_request">200</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">undefined</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">4</property>
+                            <property name="bottom_attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label19">
+                            <property name="width_request">70</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Installed: </property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="installedlabel">
+                            <property name="width_request">280</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Not Installed</property>
+                            <property name="ellipsize">start</property>
+                            <property name="single_line_mode">True</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label22">
+                            <property name="width_request">79</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Repository:
+</property>
+                          </widget>
+                          <packing>
+                            <property name="top_attach">5</property>
+                            <property name="bottom_attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="repositorylabel">
+                            <property name="width_request">200</property>
+                            <property name="height_request">20</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="yalign">0</property>
+                            <property name="label" translatable="yes">undefined</property>
+                          </widget>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">5</property>
+                            <property name="bottom_attach">6</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="padding">4</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkHBox" id="hbox2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">40</property>
+                        <child>
+                          <widget class="GtkFixed" id="fixed21">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="installbutton">
+                            <property name="label" translatable="yes">Install</property>
+                            <property name="width_request">90</property>
+                            <property name="height_request">25</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="use_action_appearance">False</property>
+                            <signal name="activate" handler="on_installbutton_activated" />
+                            <signal name="clicked" handler="on_installbutton_activated" />
+                          </widget>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="launchbutton">
+                            <property name="label" translatable="yes">Launch</property>
+                            <property name="width_request">90</property>
+                            <property name="height_request">25</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="use_action_appearance">False</property>
+                            <signal name="activate" handler="on_launchbutton_activated" />
+                            <signal name="clicked" handler="on_launchbutton_activated" />
+                          </widget>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="uninstallbutton">
+                            <property name="label" translatable="yes">Uninstall</property>
+                            <property name="width_request">90</property>
+                            <property name="height_request">25</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="use_action_appearance">False</property>
+                            <signal name="activate" handler="on_uninstallbutton_activated" />
+                            <signal name="clicked" handler="on_uninstallbutton_activated" />
+                          </widget>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkFixed" id="fixed22">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </widget>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">10</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
-                    <property name="x">25</property>
-                    <property name="y">40</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="namelabel">
-                    <property name="width_request">300</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">undefined</property>
-                  </widget>
-                  <packing>
-                    <property name="x">75</property>
-                    <property name="y">40</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label4">
-                    <property name="width_request">70</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Installed: </property>
-                  </widget>
-                  <packing>
-                    <property name="x">25</property>
-                    <property name="y">60</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="installedlabel">
-                    <property name="width_request">280</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Not Installed</property>
-                    <property name="ellipsize">start</property>
-                  </widget>
-                  <packing>
-                    <property name="x">100</property>
-                    <property name="y">60</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkButton" id="launchbutton">
-                    <property name="label" translatable="yes">Launch</property>
-                    <property name="width_request">90</property>
-                    <property name="height_request">25</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_launchbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_launchbutton_activated" swapped="no"/>
-                  </widget>
-                  <packing>
-                    <property name="x">150</property>
-                    <property name="y">130</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkButton" id="uninstallbutton">
-                    <property name="label" translatable="yes">Uninstall</property>
-                    <property name="width_request">90</property>
-                    <property name="height_request">25</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_uninstallbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_uninstallbutton_activated" swapped="no"/>
-                  </widget>
-                  <packing>
-                    <property name="x">275</property>
-                    <property name="y">130</property>
+                    <property name="expand">True</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -762,85 +945,18 @@ window in wine games</property>
                     <property name="stock">gtk-missing-image</property>
                   </widget>
                   <packing>
-                    <property name="x">25</property>
-                    <property name="y">170</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label5">
-                    <property name="width_request">113</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Emulation Mode:</property>
-                  </widget>
-                  <packing>
-                    <property name="x">25</property>
-                    <property name="y">80</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="emulationlabel">
-                    <property name="width_request">200</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">undefined</property>
-                  </widget>
-                  <packing>
-                    <property name="x">140</property>
-                    <property name="y">80</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkButton" id="installbutton">
-                    <property name="label" translatable="yes">Install</property>
-                    <property name="width_request">90</property>
-                    <property name="height_request">25</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <signal name="activate" handler="on_installbutton_activated" swapped="no"/>
-                    <signal name="clicked" handler="on_installbutton_activated" swapped="no"/>
-                  </widget>
-                  <packing>
-                    <property name="x">25</property>
-                    <property name="y">130</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="label6">
-                    <property name="width_request">79</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Repository:
-</property>
-                  </widget>
-                  <packing>
-                    <property name="x">25</property>
-                    <property name="y">100</property>
-                  </packing>
-                </child>
-                <child>
-                  <widget class="GtkLabel" id="repositorylabel">
-                    <property name="width_request">200</property>
-                    <property name="height_request">20</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">undefined</property>
-                  </widget>
-                  <packing>
-                    <property name="x">130</property>
-                    <property name="y">100</property>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="padding">5</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </widget>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="padding">8</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </widget>

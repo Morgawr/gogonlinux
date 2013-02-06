@@ -67,9 +67,9 @@ def download_script(target, url):
     Download a script from the gogonlinux url
     and save it to the target position
     """
-    reqs = requests.get(url)
+    data = get_data_from_resource(url)
     with open(target, "w+") as file_handle:
-        file_handle.write(reqs.content) #pylint: disable=E1103
+        file_handle.write(data) #pylint: disable=E1103
     os.chmod(target, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
 def obtain_launch_md5_list():

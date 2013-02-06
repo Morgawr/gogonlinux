@@ -118,6 +118,7 @@ class GogTuxGUI:
         self.gamenamelabel = self.glade_tree.get_widget("namelabel")
         self.gameinstalledlabel = self.glade_tree.get_widget("installedlabel")
         self.gameemulationlabel = self.glade_tree.get_widget("emulationlabel")
+        self.gamerepositorylabel = self.glade_tree.get_widget("repositorylabel")
         self.gamecoverimage = self.glade_tree.get_widget("coverimage")
         self.loginmenu = self.glade_tree.get_widget("loginmenu")
         self.logoutmenu = self.glade_tree.get_widget("logoutmenu")
@@ -308,11 +309,13 @@ class GogTuxGUI:
             if self.database.games[game_id].launch_script == "404":
                 self.launchbutton.set_sensitive(False)
             self.gameinstalledlabel.set_text(found_game.install_path)
+            self.gamerepositorylabel.set_text(found_game.repo_url)
         else:
             self.uninstallbutton.set_sensitive(False)
             self.installbutton.set_sensitive(True)
             self.launchbutton.set_sensitive(False)
             self.gameinstalledlabel.set_text("Not Installed")
+            self.gamerepositorylabel.set_text("Not Installed")
         self.selected_game = game_id
         self.gamenamelabel.set_text(game["title"])
         self.gameemulationlabel.set_text(game["emulation"])

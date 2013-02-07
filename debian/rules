@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+export PREFIX=/usr
+
+%:
+	dh $@
+
+override_dh_builddeb:
+	dh_builddeb -- -Zbzip2 -z9

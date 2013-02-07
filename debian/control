@@ -1,0 +1,17 @@
+Source: gogonlinux
+Section: misc
+Priority: optional
+Maintainer: Christian Dannie Storgaard <cybolic@gmail.com>
+Build-Depends: debhelper (>= 7), python-support, perl
+XS-Python-Version: >= 2.4
+Standards-Version: 3.9.1
+Homepage: http://www.gogonlinux.com
+
+Package: gogonlinux
+Architecture: all
+Depends: innoextract, python-glade2, python-pip, python-oauth2, ${misc:Depends}, ${python:Depends}
+Suggests: wine, winetricks, scummvm, dosbox
+XB-Python-Version: ${python:Versions}
+Description: An easy to use platform to play gog.com games on GNU/Linux
+ This project's goal is to provide an easy to use platform to play gog 
+ (http://www.gog.com) games on a GNU/Linux system.

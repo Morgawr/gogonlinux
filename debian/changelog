@@ -1,0 +1,7 @@
+gogonlinux (0.2~git) precise quantal raring; urgency=medium
+
+  * This is not a release. This info is only to allow Launchpad to get the version.
+  * Please see Git log or http://www.gogonlinux.com for changes.
+
+ -- Christian Dannie Storgaard <cybolic@gmail.com>  Wed, 23 Jan 2012 00:53:15 +0200
+

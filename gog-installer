@@ -275,7 +275,7 @@ def do_install(game_id, database, settings):
     db_entry = game_id
     game = gog_db.GameRecord(game_data["title"], game_data)
     # Let's download the install/uninstall scripts
-    print "Retrieving game scripts from remote server..."
+    print "Retrieving game scripts from repository..."
     if not os.path.exists(os.path.join(general_path,"scripts")):
         os.makedirs(os.path.join(general_path, "scripts"))
     # XXX: All these "install_script"/"install_path" variable names

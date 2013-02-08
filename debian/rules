@@ -12,4 +12,3 @@ override_dh_auto_install:
 	python setup.py install --root=debian/gogonlinux --install-layout=deb --install-lib=/usr/share/gogonlinux --install-scripts=/usr/share/gogonlinux
 
 override_dh_auto_build:
-

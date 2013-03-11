@@ -35,55 +35,56 @@ ICON = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH, "gog-tux-icon.svg"))
 # Let's init the gobject threading features.
 gobject.threads_init()
 
+
 class GogTuxGUI:
     """ Class representing the GUI interface for the main window of gog-tux. """
-    #some image data
+    # some image data
     compat = {}
-    imgpath = os.path.join(PACKAGE_DIRECTORY,"imgdata")
+    imgpath = os.path.join(PACKAGE_DIRECTORY, "imgdata")
     compat["green"] = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH,
-                                                            "green_compat.png"))
+                                                                "green_compat.png"))
     compat["yellow"] = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH,
-                                                           "yellow_compat.png"))
+                                                                 "yellow_compat.png"))
     compat["red"] = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH,
                                                               "red_compat.png"))
-    beta = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH,"beta.png"))
+    beta = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH, "beta.png"))
 
-    #some other default stuff
+    # some other default stuff
     islogged = False
-    game_data = {} # list of all available games from the website
+    game_data = {}  # list of all available games from the website
     selected_game = None
     window_base_title = "Gog Linux Client - %s" % version
 
     def __init__(self, connection):
         self.connection = connection
-        self.gladefile = os.path.join(PACKAGE_DIRECTORY,"gog_tux.glade")
+        self.gladefile = os.path.join(PACKAGE_DIRECTORY, "gog_tux.glade")
         self.glade_tree = gtk.glade.XML(self.gladefile)
         self.rightpanel = self.glade_tree.get_widget("rightpanel")
         self.rightpanel.hide()
         if not os.path.exists(os.path.join(os.getenv("HOME"), ".gog-tux")):
-            os.makedirs(os.path.join(os.getenv("HOME"),".gog-tux"))
+            os.makedirs(os.path.join(os.getenv("HOME"), ".gog-tux"))
         self.database = gog_db.GogDatabase(DB_PATH)
-        #This is a dictionary of all the signals handled by our GUI
-        signals = { "on_gog_tux_destroy" : gtk.main_quit,
-                    "on_close_menu_activated" : gtk.main_quit,
-                    "on_about_menu_activated" : self.about_menu_activated,
-                    "on_undoprefsbutton_clicked" : self.undo_settings,
-                    "on_saveprefsbutton_clicked" : self.save_settings,
-                    "on_gog_tux_key_pressed" : self.key_pressed,
-                    "on_installbutton_activated" : self.installbutton_activated,
-                    "on_launchbutton_activated" : self.launchbutton_activated,
-                    "on_uninstallbutton_activated" : self.uninstallbutton_activated,
-                    "on_logoutmenu_activated" : self.do_logout,
-                    "on_loginmenu_activated" : self.do_login,
-                    "updatemenu_activated" : self.check_for_updates }
+        # This is a dictionary of all the signals handled by our GUI
+        signals = {"on_gog_tux_destroy": gtk.main_quit,
+                   "on_close_menu_activated": gtk.main_quit,
+                   "on_about_menu_activated": self.about_menu_activated,
+                   "on_undoprefsbutton_clicked": self.undo_settings,
+                   "on_saveprefsbutton_clicked": self.save_settings,
+                   "on_gog_tux_key_pressed": self.key_pressed,
+                   "on_installbutton_activated": self.installbutton_activated,
+                   "on_launchbutton_activated": self.launchbutton_activated,
+                   "on_uninstallbutton_activated": self.uninstallbutton_activated,
+                   "on_logoutmenu_activated": self.do_logout,
+                   "on_loginmenu_activated": self.do_login,
+                   "updatemenu_activated": self.check_for_updates}
         self.glade_tree.signal_autoconnect(signals)
-        #obtain required resources
+        # obtain required resources
         self.window = self.glade_tree.get_widget("gog_tux")
-        #set up gui elements
+        # set up gui elements
         self.init_gui_elements()
-        #set up the lists for the games 
+        # set up the lists for the games
         self.init_lists()
-        #finalize initialization
+        # finalize initialization
         self.acquire_settings()
         self.have_beta_access = self.settings.data["access_beta"]
         self.load_games()
@@ -109,32 +110,38 @@ class GogTuxGUI:
         self.profilepic = self.glade_tree.get_widget("profilepic")
         self.installpathentry = self.glade_tree.get_widget("installpathentry")
         self.virtualresentry = self.glade_tree.get_widget("resolutionentry")
-        self.virtualdesktopcheck = self.glade_tree.get_widget("virtualdesktopcheck")
-        self.betasoftwarecheck = self.glade_tree.get_widget("betasoftwarecheck")
-        self.profileintervalentry = self.glade_tree.get_widget("profileintervalentry")
+        self.virtualdesktopcheck = self.glade_tree.get_widget(
+            "virtualdesktopcheck")
+        self.betasoftwarecheck = self.glade_tree.get_widget(
+            "betasoftwarecheck")
+        self.profileintervalentry = self.glade_tree.get_widget(
+            "profileintervalentry")
         self.launchbutton = self.glade_tree.get_widget("launchbutton")
         self.installbutton = self.glade_tree.get_widget("installbutton")
         self.uninstallbutton = self.glade_tree.get_widget("uninstallbutton")
         self.gamenamelabel = self.glade_tree.get_widget("namelabel")
         self.gameinstalledlabel = self.glade_tree.get_widget("installedlabel")
         self.gameemulationlabel = self.glade_tree.get_widget("emulationlabel")
-        self.gamerepositorylabel = self.glade_tree.get_widget("repositorylabel")
+        self.gamerepositorylabel = self.glade_tree.get_widget(
+            "repositorylabel")
         self.gamecoverimage = self.glade_tree.get_widget("coverimage")
         self.loginmenu = self.glade_tree.get_widget("loginmenu")
         self.logoutmenu = self.glade_tree.get_widget("logoutmenu")
         self.profiletablabel = self.glade_tree.get_widget("profiletablabel")
         self.profiletabpage = self.glade_tree.get_widget("profiletabpage")
         self.window.set_icon(ICON)
-        
+
     # Performs initialization of the available and installed games lists
     def init_lists(self):
-        """ 
-        Perform initialization of the lists for available and 
+        """
+        Perform initialization of the lists for available and
         installed games.
         """
 
-        self.availablegamestree = self.glade_tree.get_widget("availablegamestree")
-        self.installedgamestree = self.glade_tree.get_widget("installedgamestree")
+        self.availablegamestree = self.glade_tree.get_widget(
+            "availablegamestree")
+        self.installedgamestree = self.glade_tree.get_widget(
+            "installedgamestree")
         textrenderer = gtk.CellRendererText()
         imagerenderer = gtk.CellRendererPixbuf()
         columna = gtk.TreeViewColumn("Games", textrenderer, text=0)
@@ -142,11 +149,11 @@ class GogTuxGUI:
         columnc = gtk.TreeViewColumn("Compatibility", imagerenderer)
         columnc.add_attribute(imagerenderer, "pixbuf", 2)
         inst_columna = gtk.TreeViewColumn("Games", textrenderer, text=0)
-        inst_columnb = gtk.TreeViewColumn("Emulation mode", 
+        inst_columnb = gtk.TreeViewColumn("Emulation mode",
                                           textrenderer, text=1)
         inst_columnc = gtk.TreeViewColumn("Compatibility", imagerenderer)
         inst_columnc.add_attribute(imagerenderer, "pixbuf", 2)
-        
+
         # setup list of available games and installed games
         # 0 is the displayed name
         # 1 is emulation mode
@@ -154,9 +161,9 @@ class GogTuxGUI:
         #                                                (green, yellow and red)
         # 3 is the game id in the lookup dictionary, not going to be displayed,
         #   just used for retrieval
-        self.availgameslist = gtk.ListStore(gobject.TYPE_STRING, 
-                                            gobject.TYPE_STRING, 
-                                            gtk.gdk.Pixbuf, 
+        self.availgameslist = gtk.ListStore(gobject.TYPE_STRING,
+                                            gobject.TYPE_STRING,
+                                            gtk.gdk.Pixbuf,
                                             gobject.TYPE_STRING)
         self.installedgameslist = gtk.ListStore(gobject.TYPE_STRING,
                                                 gobject.TYPE_STRING,
@@ -173,18 +180,18 @@ class GogTuxGUI:
         self.installedgamestree.append_column(inst_columnb)
         self.installedgamestree.append_column(inst_columnc)
         selection = self.availablegamestree.get_selection()
-        selection.connect("changed", self.list_selection_changed, 
-                                     self.availablegamestree)
+        selection.connect("changed", self.list_selection_changed,
+                          self.availablegamestree)
         selection = self.installedgamestree.get_selection()
         selection.connect("changed", self.list_selection_changed,
-                                     self.installedgamestree)
+                          self.installedgamestree)
 
     def about_menu_activated(self, widget):
         """ Create the about popup window. """
         about = gtk.AboutDialog()
         about.set_program_name("Gog Tux Client")
         about.set_version(version)
-        about.set_copyright(author+" - "+email)
+        about.set_copyright(author + " - " + email)
         about.set_comments("Unofficial Linux client for the gog.com platform")
         about.set_website("http://www.gogonlinux.com")
         about.set_logo(ICON)
@@ -192,8 +199,8 @@ class GogTuxGUI:
         about.destroy()
 
     def list_selection_changed(self, widget, data):
-        """ 
-        Signal that reacts to either available or installed games list 
+        """
+        Signal that reacts to either available or installed games list
         being clicked.
         """
         if data == self.availablegamestree or data == self.installedgamestree:
@@ -206,15 +213,15 @@ class GogTuxGUI:
                 # XXX: This should be refactored to be more pleasant
                 game = self.database.games[items.get_value(element, 3)]
                 game = gog_db.GameRecord.serialize(game)
-                game["title"] = game["full_name"] # for compatibility
+                game["title"] = game["full_name"]  # for compatibility
                 game = json.loads(json.dumps(game))
             self.show_game_card(game, items.get_value(element, 3))
         else:
             self.rightpanel.hide()
 
     def installbutton_activated(self, widget):
-        """ 
-        Function called when the install button has been clicked, we know 
+        """
+        Function called when the install button has been clicked, we know
         the selected game is from the avilable games list and not from the
         installed games list because if the game is installed then we couldn't
         install it again.
@@ -224,13 +231,13 @@ class GogTuxGUI:
         setup_file = None
         if self.islogged == True:
             dialog_text = "Do you want to use an already downloaded setup file?"
-            yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, 
+            yesno = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
                                       gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
                                       dialog_text)
             resp = yesno.run()
             yesno.destroy()
         if self.islogged == False or resp == gtk.RESPONSE_YES:
-            # we need to create a filter for the .exe files 
+            # we need to create a filter for the .exe files
             setupfilter = gtk.FileFilter()
             setupfilter.set_name("GoG installer")
             setupfilter.add_pattern("setup_*.exe")
@@ -238,7 +245,7 @@ class GogTuxGUI:
                                             action=gtk.FILE_CHOOSER_ACTION_OPEN,
                                             buttons=(gtk.STOCK_CANCEL,
                                                      gtk.RESPONSE_CANCEL,
-                                                     gtk.STOCK_OPEN, 
+                                                     gtk.STOCK_OPEN,
                                                      gtk.RESPONSE_OK))
             chooser.set_default_response(gtk.RESPONSE_OK)
             chooser.add_filter(setupfilter)
@@ -250,10 +257,10 @@ class GogTuxGUI:
                 chooser.destroy()
                 return
         chooser = gtk.FileChooserDialog(title="Install root directory",
-                                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                   buttons=(gtk.STOCK_CANCEL,
-                                            gtk.RESPONSE_CANCEL,
-                                            gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+                                        action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                        buttons=(gtk.STOCK_CANCEL,
+                                                 gtk.RESPONSE_CANCEL,
+                                                 gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         # Create default install path if it doesn't exist
         if not os.path.exists(self.settings.data["install_path"]):
             os.makedirs(self.settings.data["install_path"])
@@ -262,18 +269,19 @@ class GogTuxGUI:
         resp = chooser.run()
         if resp == gtk.RESPONSE_OK:
             path = chooser.get_filename()
-            ExternalOutputWindow(self, self.selected_game, True, path, 
+            ExternalOutputWindow(self, self.selected_game, True, path,
                                  setup_file, self.have_beta_access == "True")
         chooser.destroy()
 
     def launchbutton_activated(self, widget):
-        """ 
-        Function called when the launch button has been clicked, we know 
-        the game is from the installed games list because else we couldn't 
+        """
+        Function called when the launch button has been clicked, we know
+        the game is from the installed games list because else we couldn't
         have clicked the launch button.
         """
         game = self.database.games[self.selected_game]
-        # Here we launch startgame.sh, the default startup element for all games
+        # Here we launch startgame.sh, the default startup element for all
+        # games
         startup = os.path.join(game.install_path, "startgame.sh")
         subprocess.Popen([startup])
 
@@ -281,7 +289,7 @@ class GogTuxGUI:
     def uninstallbutton_activated(self, widget):
         """
         Function called when the uninstall button has been clicked, we know
-        the game is from the installed games list because else we couldn't 
+        the game is from the installed games list because else we couldn't
         have clicked the uninstall button.
         """
         uninstall_message = ("You're about to uninstall %s, do you wish "
@@ -291,8 +299,8 @@ class GogTuxGUI:
                                   uninstall_message)
         resp = yesno.run()
         yesno.destroy()
-        if resp == gtk.RESPONSE_YES:        
-            ExternalOutputWindow(self, self.selected_game, False, 
+        if resp == gtk.RESPONSE_YES:
+            ExternalOutputWindow(self, self.selected_game, False,
                                  beta=(self.have_beta_access == "True"))
 
     def limit_string(self, string, size):
@@ -302,7 +310,7 @@ class GogTuxGUI:
         if len(string) <= size:
             return string
         else:
-            return ".." + string[len(string)-size-2:]
+            return ".." + string[len(string) - size - 2:]
 
     def show_game_card(self, game, game_id=None):
         """
@@ -335,7 +343,7 @@ class GogTuxGUI:
         thread.start()
 
     def check_for_updates(self, widget):
-        """ 
+        """
         Check for updates on launcher scripts for each installed game and prompt
         the user to select which update he wants to install.
         """
@@ -346,7 +354,7 @@ class GogTuxGUI:
             id = model.get_value(iter, 3)
             iter = model.iter_next(iter)
             gamelist[id] = self.database.games[id]
-        if not gamelist: # In case it's empty
+        if not gamelist:  # In case it's empty
             self.show_error("There are no games installed.")
             return
         UpdateWindow(gamelist)
@@ -376,7 +384,7 @@ class GogTuxGUI:
         self.profiletabpage.hide()
         if settings_changed == True:
             self.settings.store()
-    
+
     def login_callback(self):
         """ Function called when the login thread has been executed. """
         # We logged in successfully
@@ -388,11 +396,11 @@ class GogTuxGUI:
             self.loginwindow.loginglade.get_widget("logindialog").destroy()
             self.logged_successfully()
         # We closed the login dialog without logging in
-        elif self.loginwindow.result == "Destroy": 
+        elif self.loginwindow.result == "Destroy":
             logindialog = self.loginwindow.loginglade.get_widget("logindialog")
             logindialog.destroy()
         # We failed the login process
-        else: 
+        else:
             okbutton = self.loginwindow.loginglade.get_widget("okbutton")
             okbutton.set_sensitive(True)
             self.show_error(self.loginwindow.result)
@@ -437,14 +445,14 @@ class GogTuxGUI:
             self.gamenotelabel.set_text(self.user.games)
         else:
             self.gamenotelabel.set_text("none")
-        #Let's load the picture from the web
+        # Let's load the picture from the web
         response = urllib2.urlopen(self.user.imagesmall)
         loader = gtk.gdk.PixbufLoader()
         loader.write(response.read())
         loader.close()
         pixbuf = loader.get_pixbuf()
         self.profilepic.set_from_pixbuf(pixbuf.scale_simple(35, 35,
-                                                       gtk.gdk.INTERP_BILINEAR))
+                                                            gtk.gdk.INTERP_BILINEAR))
         # Refresh the update based on the settings
         # we do this because they may change dynamically
         # so we have to break the chain and re-create it every time
@@ -452,18 +460,17 @@ class GogTuxGUI:
                                     self.profile_update)
         return False
 
-
     def show_error(self, error):
         """ Show an error message through a gtk message dialog. """
         dialog = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                               gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, error)
+                                   gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, error)
         dialog.run()
         dialog.destroy()
 
     def show_warning(self, warning):
         """ Show a warning message through a gtk message dialog. """
         dialog = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT,
-                               gtk.MESSAGE_WARNING, gtk.BUTTONS_CLOSE, warning)
+                                   gtk.MESSAGE_WARNING, gtk.BUTTONS_CLOSE, warning)
         dialog.run()
         dialog.destroy()
 
@@ -473,16 +480,16 @@ class GogTuxGUI:
 
     def acquire_settings(self):
         """ Acquire settings from the settings class. """
-        path = os.path.join(os.getenv("HOME"),".gog-tux")
+        path = os.path.join(os.getenv("HOME"), ".gog-tux")
         self.settings = gog_settings.GogSettings(path)
 
     def save_settings(self, widget):
-        """ 
+        """
         Save local settings changed on the GUI onto the filesystem by
         storing them into the settings class.
         """
         virtual_desktop = str(self.virtualdesktopcheck.get_active())
-        virtual_resolution = self.virtualresentry.get_text() 
+        virtual_resolution = self.virtualresentry.get_text()
         profile_update = self.profileintervalentry.get_text()
         access_beta = str(self.betasoftwarecheck.get_active())
         self.settings.data["install_path"] = self.installpathentry.get_text()
@@ -515,8 +522,8 @@ class GogTuxGUI:
         return (self.settings.data["token"], self.settings.data["key"])
 
     def do_load_games(self):
-        """ 
-        Load game lists from the remote connection to gogonlinux 
+        """
+        Load game lists from the remote connection to gogonlinux
         and then call function to load local game list.
         """
         if self.have_beta_access == "True":
@@ -532,7 +539,7 @@ class GogTuxGUI:
             self.availgameslist.append((content["title"], content["emulation"],
                                         image, name))
         self.refresh_local_list()
-    
+
     def refresh_local_list(self):
         """ Refresh list of installed games by loading them from the db. """
         self.database.update()
@@ -572,11 +579,11 @@ class LoginWindow:
         self.loginglade = gtk.glade.XML(os.path.join(PACKAGE_DIRECTORY,
                                                      "login.glade"))
         loginwin = self.loginglade.get_widget("logindialog")
-        signals = { "on_cancelbutton_clicked" : self.close,
-                    "on_logindialog_close" : self.close,
-                    "on_okbutton_clicked" : self.do_login,
-                    "on_passwordtext_activated" : self.do_login,
-                    "on_emailtext_activated" : self.do_login }
+        signals = {"on_cancelbutton_clicked": self.close,
+                   "on_logindialog_close": self.close,
+                   "on_okbutton_clicked": self.do_login,
+                   "on_passwordtext_activated": self.do_login,
+                   "on_emailtext_activated": self.do_login}
         loginwin.connect("delete-event", self.close)
         self.loginglade.signal_autoconnect(signals)
         loginwin.show()
@@ -586,21 +593,22 @@ class LoginWindow:
         """ Close the login window. """
         self.result = "Destroy"
         self.parent.login_callback()
- 
+
     def do_login(self, widget):
         """ Execute the login process (threaded). """
         email = self.loginglade.get_widget("emailtext").get_text().strip()
-        password = self.loginglade.get_widget("passwordtext").get_text().strip()
+        password = self.loginglade.get_widget(
+            "passwordtext").get_text().strip()
         remembercheckbox = self.loginglade.get_widget("remembercheckbox")
         self.remember = remembercheckbox.get_active()
         if not email or not password:
             self.parent.show_error("Please fill in all the fields")
             return
         self.loginglade.get_widget("okbutton").set_sensitive(False)
-        thread = threading.Thread(target=self.__threaded_do_login, 
-                             args=(email, password))
+        thread = threading.Thread(target=self.__threaded_do_login,
+                                  args=(email, password))
         thread.start()
-              
+
     def __threaded_do_login(self, email, password):
         """ Thread instance that handles the login process. """
         try:
@@ -610,14 +618,15 @@ class LoginWindow:
             self.result = "%s" % exception
         gobject.idle_add(self.parent.login_callback)
 
+
 class ExternalOutputWindow:
-    """ 
-    Class that handles the GUI and methods used to interact with an 
+    """
+    Class that handles the GUI and methods used to interact with an
     external CLI command.
     """
     working = True
     process = None
-    
+
     def __init__(self, parent, game_id, install=True, path=None,
                  installer=None, beta=False):
         self.glade = gtk.glade.XML(os.path.join(PACKAGE_DIRECTORY,
@@ -625,14 +634,14 @@ class ExternalOutputWindow:
         self.window = self.glade.get_widget("externalwindow")
         self.window.set_icon(ICON)
         self.textview = self.glade.get_widget("outputview")
-        self.textview.modify_base(gtk.STATE_NORMAL, 
+        self.textview.modify_base(gtk.STATE_NORMAL,
                                   gtk.gdk.color_parse('black'))
         self.textview.modify_text(gtk.STATE_NORMAL,
                                   gtk.gdk.color_parse('green'))
         self.spinner = self.glade.get_widget("spinner1")
         self.buf = gtk.TextBuffer()
         self.textview.set_buffer(self.buf)
-        signals = { "on_action_activated" : self.do_action }
+        signals = {"on_action_activated": self.do_action}
         self.button = self.glade.get_widget("okbutton")
         self.button.set_label("Cancel")
         self.glade.signal_autoconnect(signals)
@@ -662,14 +671,14 @@ class ExternalOutputWindow:
                 return False
         else:
             # Let's give the chance to flush the buffer just in case
-            self.buf.insert_at_cursor(source.read(4096)) 
+            self.buf.insert_at_cursor(source.read(4096))
             return False
 
-    def __threaded_execute(self, command): #, pipe):
+    def __threaded_execute(self, command):  # , pipe):
         """ Thread instance that executes a cli command. """
         self.working = True
         self.process = subprocess.Popen(command, stdout=subprocess.PIPE)
-        gobject.io_add_watch(self.process.stdout, 
+        gobject.io_add_watch(self.process.stdout,
                              gobject.IO_IN | gobject.IO_HUP, self.read_output)
         self.process.wait()
         self.stop_working()
@@ -696,7 +705,7 @@ class ExternalOutputWindow:
             secret = self.parent.connection.auth_token.secret
             cmd += ("--secret=%s --token=%s" % (secret, token))
         cmd += " %s" % game_id
-        self.thread = threading.Thread(target=self.__threaded_execute, 
+        self.thread = threading.Thread(target=self.__threaded_execute,
                                        args=([cmd.split()]))
         self.thread.start()
 
@@ -707,7 +716,7 @@ class ExternalOutputWindow:
         else:
             beta_string = ""
         cmd = ("gog-installer %s -u %s" % (beta_string, game_id))
-        thread = threading.Thread(target=self.__threaded_execute, 
+        thread = threading.Thread(target=self.__threaded_execute,
                                   args=([cmd.split()]))
         thread.start()
 
@@ -718,19 +727,20 @@ class ExternalOutputWindow:
 
     def do_action(self, widget):
         """ React to the click of the only active button in the window. """
-        if self.working: # If we need to cancel the action
-            if not self.install_mode: # we cannot cancel an uninstall, sadly
+        if self.working:  # If we need to cancel the action
+            if not self.install_mode:  # we cannot cancel an uninstall, sadly
                 return
             self.process.send_signal(signal.SIGINT)
-        else: # if we are done
+        else:  # if we are done
             self.cleanup()
 
+
 class UpdateWindow:
-    """ 
+    """
     This class shows a windows with a list of updateable installed games and
     asks the user to update them or not.
     """
-    
+
     games = None
     window = None
     gladeFile = None
@@ -747,8 +757,8 @@ class UpdateWindow:
         self.games = gamelist
         self.gladeFile = gtk.glade.XML(os.path.join(PACKAGE_DIRECTORY,
                                        "updatewindow.glade"))
-        signals = { "on_cancelbutton_activated" : self.close_window,
-                    "on_okbutton_activated" : self.run_update }
+        signals = {"on_cancelbutton_activated": self.close_window,
+                   "on_okbutton_activated": self.run_update}
         self.gladeFile.signal_autoconnect(signals)
         self.window = self.gladeFile.get_widget("updatewindow")
         self.statusbox = self.gladeFile.get_widget("statusbox")
@@ -775,7 +785,7 @@ class UpdateWindow:
         togglerenderer.connect("toggled", self.__toggled, updatelisttree)
         for item in self.games:
             if (self.games[item].private == '1'):
-                continue # We don't support updates for private repos yet
+                continue  # We don't support updates for private repos yet
             self.selected.append((self.games[item].full_name, False,
                                   self.games[item].online_id))
 
@@ -798,19 +808,19 @@ class UpdateWindow:
         iter = self.selected.get_iter_first()
         data = site_conn.obtain_launch_md5_list()
         while iter is not None:
-            if self.selected.get_value(iter,1) is True:
-                gameid = self.selected.get_value(iter,2)
+            if self.selected.get_value(iter, 1) is True:
+                gameid = self.selected.get_value(iter, 2)
                 gamemd5 = self.games[gameid].obtain_launcher_md5()
                 if data[gameid]["md5"] != gamemd5:
                     msg = ("%s has outdated launcher.\n"
-                           "Updating launcher script..." % 
-                                                   self.games[gameid].full_name)
-                                      
+                           "Updating launcher script..." %
+                           self.games[gameid].full_name)
+
                     self.update_status(msg)
                     path = self.games[gameid].install_path
                     launch_script = os.path.join(path, "startgame.sh")
                     site_conn.download_script(launch_script,
-                                              data[gameid]["url"]) 
+                                              data[gameid]["url"])
             iter = self.selected.iter_next(iter)
         self.update_status("Update successful.")
         self.statusspinner.stop()

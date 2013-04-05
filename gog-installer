@@ -237,7 +237,8 @@ def do_install(game_id, database, settings):
         print "Retrieving installer..."
         deletesetup = True
         try:
-            setup = conn.download_game(game_id, tempfile.gettempdir())
+            setup_files = conn.download_game(game_id, tempfile.gettempdir())
+            setup = setup_files[0]
         except Exception as err:
             if "403" in str(err):
                 print ("You do not have the permissions to download this "
@@ -268,7 +269,8 @@ def do_install(game_id, database, settings):
     dir_util.copy_tree(os.path.join(path, "app"), path)
     shutil.rmtree(os.path.join(path, "app"))
     if deletesetup:
-        os.remove(setup)
+        for s in setup_files:
+            os.remove(s)
     print "Updating local database..."
     # Now we need to update the local database and
     # download the install/uninstall scripts

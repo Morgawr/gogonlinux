@@ -157,6 +157,7 @@ class GogConnection:
             total_size += float(installer_size)
 
         chunk = 512*1024 # 512KB each chunk
+        setup_files = []
         print "Need to obtain a total of %sMB of data" % total_size
         for element in download_urls:
             (key, url, size) = element
@@ -187,7 +188,10 @@ class GogConnection:
                     downloaded += chunk
                     file_handle.write(data)
                 print "[%s]: %d KB written" % (path, (downloaded/1024))
-        entry_path = download_urls[0][0]
-        entry_path = self.__obtain_installer_name(entry_path)
-        return os.path.join(location, entry_path)
+            setup_files.append(path)
+
+        #entry_path = download_urls[0][0]
+        #entry_path = self.__obtain_installer_name(entry_path)
+        #return os.path.join(location, entry_path)
+        return setup_files
 

@@ -137,18 +137,20 @@ class GogConnection:
         """
         # this should work most of the time but I am not 100% sure 
         client = self.__obtain_client(self.consumer, self.auth_token)
-        resp, content = client.request(self.game_details+gameid)
+        resp, content = client.request(self.game_details +
+                                       gameid + 
+                                       "/installer_win_en")
         self.__check_status(resp)
-        installers = json.loads(content)["game"]["win_installer"]
+        installers = json.loads(content)["game"]["installer_win_en"]
         total_size = 0
         download_urls = []
         for installer_data in installers:
             installer_id = installer_data["id"]
             # We need to replace , with . for decimal places
-            installer_size = installer_data["size_mb"].replace(',','.')
+            installer_size = installer_data["sizeMB"].replace(',','.')
             downloader = "%s/%s/%s/" % (self.game_installer,
                                         gameid, installer_id)
-            local_path = installer_data["path"]
+            local_path = installer_data["link"]
             # Remove the part that is not relevant to the filename
             local_path = self.__obtain_installer_name(local_path)
             download_urls.append((local_path, downloader, installer_size))

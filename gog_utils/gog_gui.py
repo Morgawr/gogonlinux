@@ -305,12 +305,13 @@ class GogTuxGUI:
 
     def limit_string(self, string, size):
         """
-        Limit the size of the string cutting it at the beginning with ...
+        Limit the size of the string cutting it at the beginning with ..
         """
         if len(string) <= size:
             return string
         else:
-            return ".." + string[len(string) - size - 2:]
+            #return ".." + string[len(string) - size - 2:]
+            return ".." + string[len(string) - size + 2:]
 
     def show_game_card(self, game, game_id=None):
         """

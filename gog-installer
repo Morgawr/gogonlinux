@@ -243,7 +243,15 @@ def do_install(game_id, database, settings):
         deletesetup = True
         try:
             setup_files = conn.download_game(game_id, tempfile.gettempdir())
-            setup = setup_files[0]
+            setup = ""
+            for setup_file in setup_files:
+                if ".exe" in setup_file:
+                    setup = setup_file
+                    break 
+            if setup == "":
+                print ("Could not find an appropriate .exe setup file "
+                       "in the downloaded files, aborting. ")
+                return 3
         except Exception as err:
             if "403" in str(err):
                 print ("You do not have the permissions to download this "
@@ -312,7 +320,8 @@ def do_install(game_id, database, settings):
     if os.path.exists(database.games[game_id].install_script_file):
         print "Executing install script..."
         subprocess.call("%s %s" % (database.games[game_id].install_script_file,
-                                   database.games[game_id].install_path), shell=True)
+                                   database.games[game_id].install_path), 
+                                   shell=True)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     print "Done."
     print "%s installed in %s" % (database.games[game_id].full_name, path)

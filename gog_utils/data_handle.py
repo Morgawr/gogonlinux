@@ -2,6 +2,7 @@
 
 import json
 
+
 class UserData:
     """ Class to handle user data from gog.com """
 
@@ -26,4 +27,3 @@ class UserData:
         self.messages = str(user["notifications"]["messages"])
         self.imagebig = user["avatar"]["big"]
         self.imagesmall = user["avatar"]["small"]
-

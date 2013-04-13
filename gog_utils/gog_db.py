@@ -14,6 +14,7 @@ import gog_utils.gog_filelock as FileLock
 
 FILELOCK_PATH = os.path.join("/tmp", "lock", getpass.getuser())
 
+
 class GogDatabase:
     """ Class representing the game database. """
 
@@ -44,12 +45,12 @@ class GogDatabase:
         # Locking for race condition purposes
         with FileLock.FileLock(os.path.basename(self.dbpath), FILELOCK_PATH):
             file_handle = open(self.dbpath, 'w')
-            file_handle.write(json.dumps(self.games, indent=4, 
-                               default=GameRecord.serialize))
+            file_handle.write(json.dumps(self.games, indent=4,
+                                         default=GameRecord.serialize))
             file_handle.close()
 
     def remove_game(self, name):
-        """ Remove a game from the database. """        
+        """ Remove a game from the database. """
         if self.has_game(name):
             del self.games[name]
 
@@ -59,8 +60,8 @@ class GogDatabase:
             self.games[name] = game
 
     def has_game(self, name):
-        """ 
-        Check whether a game is in the database. 
+        """
+        Check whether a game is in the database.
         This basically means whether the game is
         installed or not
         """
@@ -124,7 +125,6 @@ class GameRecord(json.JSONEncoder):
         file_handle.close()
         return hashlib.md5(data).hexdigest()
 
-    
     @staticmethod
     def serialize(obj):
         """ Serialize a GameRecord object. """
@@ -144,4 +144,3 @@ class GameRecord(json.JSONEncoder):
         data["private_repository"] = obj.private
         data["repository_url"] = obj.repo_url
         return data
-

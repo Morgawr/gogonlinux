@@ -74,7 +74,6 @@ class GogConnection:
     def connect(self, username, password):
         """ Connect to gog.com using the defined username and password. """
         client = self.__obtain_client(self.consumer)
-        # resp, content = client.request(self.url_base+self.temp_token, "GET")
         resp, content = client.request(self.temp_token, "GET")
         self.__check_status(resp)
         request_token = dict(urlparse.parse_qsl(content))
@@ -190,7 +189,4 @@ class GogConnection:
                 print "[%s]: %d KB written" % (path, (downloaded / 1024))
             setup_files.append(path)
 
-        #entry_path = download_urls[0][0]
-        #entry_path = self.__obtain_installer_name(entry_path)
-        #return os.path.join(location, entry_path)
         return setup_files

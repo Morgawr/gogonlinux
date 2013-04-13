@@ -310,7 +310,6 @@ class GogTuxGUI:
         if len(string) <= size:
             return string
         else:
-            #return ".." + string[len(string) - size - 2:]
             return ".." + string[len(string) - size + 2:]
 
     def show_game_card(self, game, game_id=None):
@@ -675,7 +674,7 @@ class ExternalOutputWindow:
             self.buf.insert_at_cursor(source.read(4096))
             return False
 
-    def __threaded_execute(self, command):  # , pipe):
+    def __threaded_execute(self, command):  
         """ Thread instance that executes a cli command. """
         self.working = True
         self.process = subprocess.Popen(command, stdout=subprocess.PIPE)

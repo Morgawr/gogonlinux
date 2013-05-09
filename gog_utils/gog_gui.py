@@ -28,6 +28,7 @@ from gog_utils.version import email
 
 PACKAGE_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(os.getenv("HOME"), ".gog-tux", "db.json")
+CACHE_PATH = os.path.join(os.getenv("HOME"), ".gog-tux", "list.cache")
 IMG_PATH = os.path.join(PACKAGE_DIRECTORY, "imgdata")
 ICON = gtk.gdk.pixbuf_new_from_file(os.path.join(IMG_PATH, "gog-tux-icon.svg"))
 
@@ -87,7 +88,7 @@ class GogTuxGUI:
         # finalize initialization
         self.acquire_settings()
         self.have_beta_access = self.settings.data["access_beta"]
-        self.load_games()
+        self.do_load_games(False) # Read from cache first
         if self.check_cookies():
             token, key = self.obtain_cookies()
             self.connection.set_auth_token(token, key)
@@ -95,6 +96,7 @@ class GogTuxGUI:
         else:
             self.do_logout(None)
         self.window.show()
+        self.load_games()
         self.undo_settings(None)
 
     def init_gui_elements(self):
@@ -413,22 +415,35 @@ class GogTuxGUI:
         self.islogged = True
         self.loginmenu.set_sensitive(False)
         self.logoutmenu.set_sensitive(True)
-        self.profiletabpage.show()
-        self.profile_update()
+        self.profiletabpage.hide()
+        self.do_profile_update()
 
-    def profile_update(self):
+    def do_profile_update(self):
+        thread = threading.Thread(target=self.__threaded_profile_update)
+        thread.start()
+
+
+    def __threaded_profile_update(self):
+        error = False
+        data = None
+        try:
+            data = data_handle.UserData(self.connection.get_user_data())
+        except:
+            error = True
+        gobject.idle_add(self.profile_update, data, error)
+
+
+    def profile_update(self, data, error):
         """
         Function called through a timer, update profile and all
         related data on the GUI.
         """
-        try:
-            self.user = data_handle.UserData(self.connection.get_user_data())
-        except:
+        self.user = data
+        if error:
             self.show_error("There was a connection problem with the login "
                             "page. Live profile update will be disabled.\n"
                             "Please relog/restart the client.")
             return False
-
         if not self.islogged:
             return False
         self.accountlabel.set_text(self.user.name)
@@ -456,11 +471,12 @@ class GogTuxGUI:
         pixbuf = loader.get_pixbuf()
         self.profilepic.set_from_pixbuf(pixbuf.scale_simple(35, 35,
                                                             gtk.gdk.INTERP_BILINEAR))
+        self.profiletabpage.show()
         # Refresh the update based on the settings
         # we do this because they may change dynamically
         # so we have to break the chain and re-create it every time
         gobject.timeout_add_seconds(int(self.settings.data["profile_update"]),
-                                    self.profile_update)
+                                    self.do_profile_update)
         return False
 
     def show_error(self, error):
@@ -524,16 +540,21 @@ class GogTuxGUI:
         """ Obtain the cookies from the settings. """
         return (self.settings.data["token"], self.settings.data["key"])
 
-    def do_load_games(self):
+    def do_load_games(self, online=True):
         """
-        Load game lists from the remote connection to gogonlinux
-        and then call function to load local game list.
+        Load game lists from the remote connection to gogonlinux or from the
+        locally stored cache, and then call function to load local game list.
         """
-        if self.have_beta_access == "True":
-            beta = True
+        if not online and not os.path.exists(CACHE_PATH): 
+            return
+        beta = self.have_beta_access == "True"
+        if not online:
+            self.game_data = site_conn.obtain_available_games(beta, CACHE_PATH)
         else:
-            beta = False
-        self.game_data = site_conn.obtain_available_games(beta)
+            self.game_data = site_conn.obtain_available_games(beta)
+            with open(CACHE_PATH, "w") as f:
+                f.write(json.dumps(self.game_data))
+        self.availgameslist.clear()
         for name, content in self.game_data.items():
             if content["released"] == '0':
                 image = self.beta

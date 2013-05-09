@@ -44,7 +44,6 @@ def obtain_available_games(beta, repo=None):
         site = "%s%s" % (WEBSITE_URL, AVAILABLE_GAMES)
     return json.loads(get_data_from_resource(site))
 
-
 def generate_dummy_data(game_id):
     """
     Create fake JSON data for games that aren't yet supported by

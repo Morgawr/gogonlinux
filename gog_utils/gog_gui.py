@@ -680,8 +680,11 @@ class ExternalOutputWindow:
     def __threaded_execute(self, command):  
         """ Thread instance that executes a cli command. """
         self.working = True
-        self.process = subprocess.Popen(command, stdout=subprocess.PIPE)
+        self.process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
         gobject.io_add_watch(self.process.stdout,
+                             gobject.IO_IN | gobject.IO_HUP, self.read_output)
+        gobject.io_add_watch(self.process.stderr,
                              gobject.IO_IN | gobject.IO_HUP, self.read_output)
         self.process.wait()
         self.stop_working()

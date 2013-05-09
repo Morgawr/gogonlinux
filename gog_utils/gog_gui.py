@@ -419,11 +419,16 @@ class GogTuxGUI:
         self.do_profile_update()
 
     def do_profile_update(self):
+        """
+        Wrapper for threaded profile update call
+        """
         thread = threading.Thread(target=self.__threaded_profile_update)
         thread.start()
 
-
     def __threaded_profile_update(self):
+        """ 
+        Threaded profile update
+        """
         error = False
         data = None
         try:

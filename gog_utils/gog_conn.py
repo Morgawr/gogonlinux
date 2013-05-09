@@ -27,7 +27,7 @@ class GogConnection:
         self.get_token = data["oauth_get_token"]
         self.user_url = data["get_user_details"]
         self.user_games = data["get_user_games"]  # This does not work yet :(
-        self.game_details = data["get_game_details"]
+        self.game_details = data["get_game_details"] + '/'
         self.game_installer = data["get_installer_link"]
         self.game_extras = data["get_extra_link"]
 

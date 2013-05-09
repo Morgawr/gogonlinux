@@ -206,6 +206,9 @@ class GogTuxGUI:
         if data == self.availablegamestree or data == self.installedgamestree:
             self.rightpanel.show()
             items, paths = data.get_selection().get_selected_rows()
+            if len(paths) == 0:
+                self.rightpanel.hide()
+                return
             element = items.get_iter(paths[0])
             if data == self.availablegamestree:
                 game = self.game_data[items.get_value(element, 3)]

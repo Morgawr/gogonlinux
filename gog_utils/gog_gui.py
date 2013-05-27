@@ -742,7 +742,7 @@ class ExternalOutputWindow:
         self.thread.start()
 
     def launch_uninstall(self, game_id, beta):
-        """ Launc the command required to uninstall a game through cli. """
+        """ Launch the command required to uninstall a game through cli. """
         if beta:
             beta_string = "--beta "
         else:

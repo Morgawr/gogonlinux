@@ -319,7 +319,7 @@ def do_install(game_id, database, settings):
     # then we need to run the install script on the target's directory
     if os.path.exists(database.games[game_id].install_script_file):
         print "Executing install script..."
-        subprocess.call("%s %s" % (database.games[game_id].install_script_file,
+        subprocess.call("%s %s 2> /dev/null" % (database.games[game_id].install_script_file,
                                    database.games[game_id].install_path), 
                                    shell=True)
     signal.signal(signal.SIGINT, signal.SIG_DFL)
